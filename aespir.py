@@ -22,4 +22,16 @@ async def _8ball(ctx,*,question):
     await ctx.send(f'Question: {question}\nAnswer: {random.choice(responses)}')
     print(f'8ball, {(client.latency*1000)}ms')
     
-client.run('NjQ0NTk3MTQxOTIyMzgxODI0.Xc2Wmg.v1agv9yAEASTLMMhuOpo1ulSID8') #bot token
+def raw(text):
+    #gets rid of unfresh and unrad characters that we don't want
+    new_string=''
+    for char in text:
+        try: new_string+=escape_dict[char]
+        except KeyError: new_string+=char
+    #new_string = new_string[:-3]
+    return new_string
+
+tokenfile = open("token.txt","r") #get the token from the file 
+token = raw(str(tokenfile.readline()))
+
+client.run(token)
