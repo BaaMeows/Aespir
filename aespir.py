@@ -19,7 +19,7 @@ async def _8ball(ctx,*,question):
                   'As I see it, yes.','Most likely.','Outlook good.','Yes.','Signs point to yes.','Reply hazy, try again.',
                   'Ask again later.','Better not tell you now.','Cannot predict now.','Concentrate and ask again.',
                   'Don\'t count on it.','My reply is no.','My sources say no.','Outlook not so good.','Very doubtful.']
-    await ctx.send(random.choice(responses))
+    await ctx.send(f'Question: {question}\nAnswer: {random.choice(responses)}')
     print(f'8ball command,{(client.latency*1000)}ms')
     
 client.run('NjQ0NTk3MTQxOTIyMzgxODI0.Xc2Wmg.v1agv9yAEASTLMMhuOpo1ulSID8') #bot token
