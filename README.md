@@ -1,8 +1,10 @@
 # Aespir
-just a discord bot me and a friend are working on, it can do some basic stuff.
-also it's a single python script and a few text files.
+Tyler Dolph, Jaden Torres 2019
 
-if you want to use this (for some reason), your bot token goes in the first
-line of token.txt
+just a simple bot we're working on. it'll do simple bot things. the simple life.
+living on a small farm. fishing. that sort of thing.
 
-all the code and stuffs is in aespir.py right now. ye.
+if you want to use this (for some reason), feel free to.
+your bot token goes in the firstline of token.txt
+
+all the code and stuff is in aespir.py right now. ye. bye.
