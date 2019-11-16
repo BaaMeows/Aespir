@@ -21,7 +21,11 @@ async def _8ball(ctx,*,question):
                   'Don\'t count on it.','My reply is no.','My sources say no.','Outlook not so good.','Very doubtful.']
     await ctx.send(f'Question: {question}\nAnswer: {random.choice(responses)}')
     print(f'8ball, {(client.latency*1000)}ms')
+
     
+escape_dict={'':r'','\b':r'','\c':r'','\f':r'','\n':r'','\r':r'','\t':r'','\v':r'','\'':r'','\"':r'','\0':r'','\1':r'','\2':r'',
+             '\3':r'','\4':r'','\5':r'','\6':r'','\7':r'','\8':r'','\9':r''}
+
 def raw(text):
     #gets rid of unfresh and unrad characters that we don't want
     new_string=''
@@ -31,7 +35,7 @@ def raw(text):
     #new_string = new_string[:-3]
     return new_string
 
-tokenfile = open("token.txt","r") #get the token from the file 
+tokenfile = open("token.txt","r") #get the token from token.txt
 token = raw(str(tokenfile.readline()))
-
+print('attempting start with token '+token)
 client.run(token)
