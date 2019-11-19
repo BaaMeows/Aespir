@@ -13,7 +13,7 @@ async def on_ready():
 client.remove_command('help')
 @client.command()
 async def help(ctx): #a custom yet garbage help command
-    await ctx.send('```aespir v.0 - prefix \'-\'\n---\ncommands:\nping\nflip\n8ball {your question}\nmeme\nmemeadd {a link to your meme}```')
+    await ctx.send('```aespir v.0 - prefix \'-\'\n---\ncommands:\nping\nflip\n8ball {your question}\nmeme\nhellfire {number} {password} :)\nmemeadd {a link to your meme}```')
     print(f'help     {round(client.latency*1000)}ms')
 
 
@@ -79,23 +79,21 @@ escape_dict={'\b':r'','\c':r'','\f':r'','\n':r'','\r':r'','\t':r'','\v':r'',
              '\3':r'','\4':r'','\5':r'','\6':r'','\7':r'','\8':r'','\9':r''}
 
 @client.command()
-async def hellfire(ctx,*,num = '10'):
-    await ctx.send('awaiting administrator approval...')
-    ohfrick = 'sans'
-    while ohfrick != 'n' and ohfrick != 'y':
-        #ohfrick = input('hellfire initiated, '+num+'. proceed? (y/n) ')
-        ohfrick = 'y'
-    if ohfrick == 'y':
-        await ctx.send('hellfire approved. commencing...')
-        print('hellfire approved, commencing...')
+async def hellfire(ctx,num,*,passwordinp):
+    hellfile = open("hellpassword.txt","r") #get the token from token.txt
+    password = raw(str(tokenfile.readline()))
+    hellfile.truncate(0)
+    if passwordinp == password and password != '':
+        await ctx.send('hellfire accepted. commencing...')
         i = 0
         while i < int(num):
             await ctx.send('@everyone')
             print(f'hellfire {round(client.latency*1000)}ms')
             i += 1
-    else:
-        await ctx.send('hellfire denied.')
-        print('hellfire denied.')
+    elif password == '':
+        await ctx.send('hellfire denied, no password set.')
+        print(f'hellfire denied, no password set. set one in hellfire.txt.')
+    else: await ctx.send('hellfire denied.')
             
 
 
@@ -117,10 +115,5 @@ def clientrun():
     try:
         client.run(token)
     except Exception:
-        newtoken = input('error, bad token passed. new token-\n')
-        tokenfile = open("token.txt","a")
-        tokenfile.truncate(0)
-        tokenfile.write(newtoken)
-        tokenfile.close()
-        input('sorry, but aespir needs to take a little nap. please run the file again.\n(press enter to exit)')
+        input('error, bad token passed. press enter to exit.')
 clientrun()
