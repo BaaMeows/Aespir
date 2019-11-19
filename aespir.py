@@ -83,7 +83,8 @@ async def hellfire(ctx,*,num = '10'):
     await ctx.send('awaiting administrator approval...')
     ohfrick = 'sans'
     while ohfrick != 'n' and ohfrick != 'y':
-        ohfrick = input('hellfire initiated, '+num+'. proceed? (y/n) ')
+        #ohfrick = input('hellfire initiated, '+num+'. proceed? (y/n) ')
+        ohfrick = 'y'
     if ohfrick == 'y':
         await ctx.send('hellfire approved. commencing...')
         print('hellfire approved, commencing...')
