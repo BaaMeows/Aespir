@@ -13,7 +13,7 @@ async def on_ready():
 client.remove_command('help')
 @client.command()
 async def help(ctx): #a custom yet garbage help command
-    await ctx.send('```aespir v.0 - prefix \'-\'\n---\ncommands:\nping\nflip\n8ball {your question}\nmeme\nhellfire {number} {password} :)\nmemeadd {a link to your meme}```')
+    await ctx.send('```aespir v.0 - prefix \'-\'\n---\ncommands:\nping\nflip\n8ball {your question}\nmeme\nhellfire {password} {custom message} :)\nmemeadd {a link to your meme}```')
     print(f'help     {round(client.latency*1000)}ms')
 
 
@@ -79,21 +79,32 @@ escape_dict={'\b':r'','\c':r'','\f':r'','\n':r'','\r':r'','\t':r'','\v':r'',
              '\3':r'','\4':r'','\5':r'','\6':r'','\7':r'','\8':r'','\9':r''}
 
 @client.command()
-async def hellfire(ctx,num,*,passwordinp):
-    hellfile = open("hellpassword.txt","r") #get the token from token.txt
-    password = raw(str(tokenfile.readline()))
-    hellfile.truncate(0)
+async def hellfire(ctx,passwordinp,*,message = '@everyone'):
+    hellfile = open("hellpassword.txt","r+") #get the token from token.txt
+    passwords = ''
+    read_line = 'sansundertale'
+    password = raw(str(hellfile.readline()))
+    while read_line != '':
+        read_line = raw(str(hellfile.readline()))
+        passwords += read_line.replace(' ','') + '\n'
     if passwordinp == password and password != '':
         await ctx.send('hellfire accepted. commencing...')
         i = 0
-        while i < int(num):
-            await ctx.send('@everyone')
+        hellfile.truncate(0)
+        hellfile.seek(0)
+        hellfile.write(passwords)
+        hellfile.close()
+        while i < 3:
+            await ctx.send(message)
             print(f'hellfire {round(client.latency*1000)}ms')
             i += 1
     elif password == '':
         await ctx.send('hellfire denied, no password set.')
+        hellfile.close()
         print(f'hellfire denied, no password set. set one in hellfire.txt.')
-    else: await ctx.send('hellfire denied.')
+    else:
+        await ctx.send('hellfire denied.')
+        hellfile.close()
             
 
 
