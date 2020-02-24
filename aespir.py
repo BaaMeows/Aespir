@@ -1,6 +1,8 @@
 import discord
 from discord.ext import commands
 import random
+import time
+
 
 client = commands.Bot(command_prefix = '-')
 
@@ -8,20 +10,16 @@ client = commands.Bot(command_prefix = '-')
 async def on_ready():
     print('aespir is ready')
 
-
-
 client.remove_command('help')
 @client.command()
 async def help(ctx): #a custom yet garbage help command
-    await ctx.send('```aespir v.0 - prefix \'-\'\n---\ncommands:\nping\nflip\n8ball {your question}\nmeme\nhellfire {password} {custom message} :)\nmemeadd {a link to your meme}```')
+    await ctx.send('```aespir v0.1 - prefix \'-\'\n---\ncommands:\nping (pong!)\nflip (a coin)\n8ball {your question}\nmeme (yes)\nmemeadd {a link to your meme}\nbubblewrap {custom message, defaults to pop}\nhellfire {password} {custom message, defaults to something chaotic} :)```')
     print(f'help     {round(client.latency*1000)}ms')
-
 
 @client.command()
 async def ping(ping): #pong!
     await ping.send(f'pong! {round(client.latency*1000)}ms')
     print(f'pong     {round(client.latency*1000)}ms')
-
 
 @client.command(aliases =['8ball']) #an 8ball command idk
 async def _8ball(ctx,*,question):
@@ -31,6 +29,11 @@ async def _8ball(ctx,*,question):
                   'Don\'t count on it.','My reply is no.','My sources say no.','Outlook not so good.','Very doubtful.']
     await ctx.send(f'```Question: {question}\nAnswer: {random.choice(responses)}```')
     print(f'8ball    {round(client.latency*1000)}ms')
+
+@client.command()
+async def bubblewrap(ctx,*,pop='pop'):
+    await ctx.send(("|| "+pop+" ||") * int(2000/((len(pop)+6))))
+    print(f'bwrap    {round(client.latency*1000)}ms')
 
 @client.command()
 async def flip(ctx):
@@ -53,26 +56,24 @@ async def meme(ctx): #memes yeyeye
      memes.close()
      print(f'meme     {round(client.latency*1000)}ms')
 
-
-filestuff = ['.gif','.png','.jpg','.mov','.mp4','.mp3']
+filestuff = ['.gif','.png','.jpg','.mov','.mp4','.mp3','.webp']
 @client.command() #command to add  m e m e s
 async def memeadd(ctx,*,link):
+    link2 = link
     islink = False
     bruh = False
     for end in filestuff:
         if end in link: islink = True
-    memes = open("memes.txt","a")
+    memes = open("memes.txt","r+")
     for aaa in escape_dict:
         if aaa in link: bruh = True
-    if islink and not bruh:
+    if link2 in memes: await ctx.send('thanks gamer, but I already have that one!')
+    elif islink and not bruh:
         memes.write('\n'+link)
         await ctx.send('your meme has been added to the collection :)')
-    else:
-        await ctx.send('woah there buckaroo, not so fast. we only want meme links in these parts, \'yahear.')
+    else: await ctx.send('woah there buckaroo, not so fast. we only want meme links in these parts, \'yahear.')
     memes.close()
     print(f'addmeme  {round(client.latency*1000)}ms')
-
-
 
 escape_dict={'\b':r'','\c':r'','\f':r'','\n':r'','\r':r'','\t':r'','\v':r'',
              '\'':r'','\"':r'','\0':r'','\1':r'','\2':r'',
@@ -94,7 +95,8 @@ async def hellfire(ctx,passwordinp,*,message = '@everyone'):
         hellfile.seek(0)
         hellfile.write(passwords)
         hellfile.close()
-        while i < 3:
+        while i < 50:
+            time.sleep(1)
             await ctx.send(message)
             print(f'hellfire {round(client.latency*1000)}ms')
             i += 1
@@ -105,8 +107,6 @@ async def hellfire(ctx,passwordinp,*,message = '@everyone'):
     else:
         await ctx.send('hellfire denied.')
         hellfile.close()
-            
-
 
 def raw(text):
     #gets rid of unfresh and unrad characters that we don't want
