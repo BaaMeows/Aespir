@@ -80,7 +80,7 @@ escape_dict={'\b':r'','\c':r'','\f':r'','\n':r'','\r':r'','\t':r'','\v':r'',
              '\3':r'','\4':r'','\5':r'','\6':r'','\7':r'','\8':r'','\9':r''}
 
 @client.command()
-async def hellfire(ctx,passwordinp,*,message = '@everyone'):
+async def hellfire(ctx,passwordinp,*,message = 'something chaotic'):
     hellfile = open("hellpassword.txt","r+") #get the token from token.txt
     passwords = ''
     read_line = 'sansundertale'
