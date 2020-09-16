@@ -1,5 +1,5 @@
 # Aespir
-Tyler Dolph, Jaden Torres 2019
+Tyler Dolph, Jaden Torres 2019-2020
 
 just a simple bot we're working on. it'll do simple bot things. the simple life.
 living on a small farm. fishing. that sort of thing.
