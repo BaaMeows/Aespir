@@ -8,9 +8,12 @@ import os, os.path
 from os import walk
 import urllib.request
 import base64
+import asyncio
+import re
 #=======================================#
 INF = 2147483647
-client = commands.Bot(command_prefix = '-')
+PREFIX = '~'
+client = commands.Bot(command_prefix = PREFIX)
 user_agent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
 #=======================================#
 filestuff = ['.gif','.png','.jpg','.mov','.mp4','.mp3','.webp']
@@ -31,20 +34,22 @@ def raw(text):
 #=======================================#
 @client.event
 async def on_ready():
-    await client.change_presence(activity=discord.Game(name="Minecraft"))
-    print('set activity')
-    #await client.change_presence(activity=discord.CustomActivity(name="-help"))
+    await client.change_presence(activity=discord.Game(name="my prefix is a squiggly line"))
+    #await client.change_presence(activity=discord.CustomActivity(name="my prefix is a squiggly line"))
+    print('Aespir is ready')
+
     await shuffleImages(memecounter,memelist, 'memes')
     await shuffleImages(cutecounter,cutelist, 'cute')
-    print('Aespir is ready')
+#=======================================#
 #=======================================#
 client.remove_command('help')
 @client.command()
 async def help(ctx): #a custom yet garbage help command
-    await ctx.send('''```aespir v0.3, prefix \'-\'\n---\ncommands:
+    await ctx.send('''```aespir v0.4, prefix \''''+PREFIX+''''\n---\ncommands:
 ping (pong!)
 flip (a coin)
 8ball {your question}
+echo {your message}
 uwu {your text} (uwu)
 meme (yes)
 addmeme {media attachment or link}
@@ -56,9 +61,32 @@ roulette (russian!)
 roulettespin (spins the chamber, if you're into that sort of thing)
 roulettebutwithasemiautomaticpistol (uh)
 pp (nice pp)
-gay (gay)
+gay {message (optional)} (gay)
+pingme (pings you after a randomized timer. why would you use this?????)
+whoami (for testing)
 invite (yes pls)```''')
     print(f'help     {round(client.latency*1000)}ms')
+#=======================================#
+@client.event 
+async def on_message(message):
+    await client.process_commands(message)
+#=======================================#
+    if message.author == client.user: return
+    msg = message.content.lower().replace(",","")
+#=======================================# sus 
+    if 'sus' in msg:
+        await message.channel.send('sus!!!')
+        print(f'sus      {round(client.latency*1000)}ms')
+#=======================================# dad
+    imList = ['i\'m ','im ','i am ']
+    for im in imList:
+        if im in msg:
+            msgList = msg.split(im)
+            if len(msgList) > 1: person = msgList[1]
+            else: person = msgList[0]
+            await message.channel.send('hi ' + person +', '+im+'dad!')
+            print(f'imdad    {round(client.latency*1000)}ms')
+            return
 #=======================================#
 @client.command()
 async def ping(ping): #pong!
@@ -90,6 +118,19 @@ async def uwu(ctx,*,text):
     await ctx.send(f'{text}')
     print(f'uwu      {round(client.latency*1000)}ms')
 #=======================================#
+@client.command() 
+async def echo(ctx,*,text):
+    await ctx.send(text)
+    print(f'echo     {round(client.latency*1000)}ms')
+#=======================================#
+@client.command(pass_context=True) 
+async def pingme(ctx):
+    await ctx.send('will do!')
+    print(f'pingme0  {round(client.latency*1000)}ms')
+    await asyncio.sleep(random.randint(300,1200))
+    await ctx.send(ctx.message.author.mention)
+    print(f'pingme1  {round(client.latency*1000)}ms')
+#=======================================#
 @client.command()
 async def bubblewrap(ctx,*,pop='pop'):
     await ctx.send(("|| "+pop+" ||") * int(2000/((len(pop)+6))))
@@ -98,7 +139,7 @@ async def bubblewrap(ctx,*,pop='pop'):
 @client.command()
 async def flip(ctx):
     coin = ['heads','tails']
-    await ctx.send(f'```you flipped {random.choice(coin)}!```')
+    await ctx.send(f'you flipped {random.choice(coin)}!')
     print(f'flip     {round(client.latency*1000)}ms')
 #=======================================#
 async def shuffleImages(counter, imglist, folder):
@@ -148,7 +189,7 @@ async def addcute(ctx, link = ''):
 #=======================================#
 async def image(ctx, imglist, counter, folder, word):
     sent = imglist[counter]
-    await ctx.send('```your '+word+', good lad ```',file=discord.File('.\\'+folder+'\\'+sent))
+    await ctx.send('your '+word+', good lad',file=discord.File('.\\'+folder+'\\'+sent))
     print(f'{word.split()[0]}     {round(client.latency*1000)}ms')
     return counter + 1
 #=======================================#
@@ -157,11 +198,11 @@ async def addimage(ctx, link, folder):
     headers={'User-Agent':user_agent,}
     if ctx.message.attachments: link = ctx.message.attachments[0].url
     islink = False
-#======================#
+
     if link:
         for end in filestuff:
             if end in link[len(link)-len(end):len(link)]: islink = True
-#======================#
+
     if islink:
         request=urllib.request.Request(link, None, headers)
         response = urllib.request.urlopen(request)
@@ -171,26 +212,26 @@ async def addimage(ctx, link, folder):
         newImg.write(data)
         newImg.close()
         await ctx.send('```your media has been added to the collection :)```')
-#======================#
+
     else: await ctx.send('```woah there buckaroo, not so fast. we only want media attachments and links in these parts, \'yahear.```')
 #=======================================#
-aeugh = -1
-@client.command()
+chambers = {}
+@client.command(pass_context=True)
 async def roulette(ctx):
-    global aeugh
-    if aeugh < 0:
-        aeugh = random.randint(0,5)
-    if aeugh == 0:
-        await ctx.send('```bang!```')
+    global chambers
+    id = ctx.channel.id
+    if id not in chambers: chambers[id]=-1
+    pos = chambers[id]
+    if pos < 0: pos = random.randint(0,5)
+    if pos == 0: await ctx.send('```bang!```')
     else: await ctx.send('```click...```')
-#======================#
-    aeugh -= 1
+    chambers[id]-=1
     print(f'roulette {round(client.latency*1000)}ms')
 #=======================================#
 @client.command()
 async def roulettespin(ctx):
-    global aeugh
-    aeugh = random.randint(0,5)
+    global chambers
+    chambers[ctx.channel.id] = random.randint(0,5)
     await ctx.send('```haha chamber go spin```')
     print(f'spin     {round(client.latency*1000)}ms')
 #=======================================#
@@ -199,7 +240,7 @@ funkytime = False
 async def botcontrol(ctx):
     global funkytime
     while funkytime:
-        msg = await input()
+        msg = input()
         await ctx.send(msg)
 #=======================================#
 @client.command()
@@ -219,18 +260,30 @@ async def pp(ctx, userString = None):
     else: await ctx.send('here be '+userString+'\'s pp, my good lad: 8'+('='*random.randint(1,20)+')'))
     print(f'pp       {round(client.latency*1000)}ms')
 #=======================================#
-@client.command()
-async def gay(ctx, userString = None):
-    num = random.randint(0,101)
+@client.command(pass_context=True)
+async def gay(ctx,*,userString = None):
+    if not userString: userString = str(ctx.message.author.name)
+    random.seed(userString)
+    num = int(random.random()*100)
+    #num = random.randint(0,101)
+    #num = random.seed(ord(userString[0]))
     if num >= 95: num = 100
     if num <= 5: num = 0
     if not userString: await ctx.send('```you are '+ str(num) +'%'+ ' gay```')
-    else: await ctx.send('```'+ userString + ' is ' + str(num) +'%'+ ' gay```')
+    else: await ctx.send(userString + ' is ' + str(num) +'%'+ ' gay')
     #if not userString: await ctx.send('```you are '+ str(100) +'%'+ ' gay```')
-    #else: 
-        #await ctx.send('```'+ userString + ' is ' + str(100) +'%'+ ' gay```')
+    #else: await ctx.send('```'+ userString + ' is ' + str(100) +'%'+ ' gay```')
     print(f'gay      {round(client.latency*1000)}ms')
 #=======================================#
+@client.command(pass_context=True)
+async def whoami(ctx):
+    await ctx.send('you are '+ ctx.message.author.name + ", id "+ str(ctx.message.author.id))
+#=======================================#
+async def hellfireLoop(ctx, message):
+    await ctx.send(message)
+    await asyncio.sleep(5)
+    print('lmao')
+#=====================#
 @client.command()
 async def hellfire(ctx,passwordinp,*,message = 'something fun'):
     hellfile = open("hellpassword.txt","r+") #get the token from token.txt
@@ -243,15 +296,12 @@ async def hellfire(ctx,passwordinp,*,message = 'something fun'):
     if passwordinp == password and password != '':
         await ctx.send('```hellfire accepted. commencing...```')
         print(f'hellfire {round(client.latency*1000)}ms')
-        i = 0
         hellfile.truncate(0)
         hellfile.seek(0)
         hellfile.write(passwords)
         hellfile.close()
-        while i < 500:
-            time.sleep(1)
-            await ctx.send(message)
-            i += 1
+        coros = [hellfireLoop(ctx,message) for _ in range(100)]
+        await asyncio.gather(*coros)
     elif password == '':
         await ctx.send('```hellfire denied, no password set.```')
         hellfile.close()
