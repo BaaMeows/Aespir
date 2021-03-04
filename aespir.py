@@ -10,6 +10,7 @@ import urllib.request
 import base64
 import asyncio
 import re
+from concurrent.futures import ThreadPoolExecutor
 #=======================================#
 INF = 2147483647
 PREFIX = '~'
@@ -60,7 +61,7 @@ pingme (pings you after a randomized timer. why would you use this?????)
 whoami (for testing)
 invite (yes please)
 sourcecode (i'm open source!)```''')
-    print(f'help     {round(client.latency*1000)}ms')
+    await cmdlog('help')
 #=======================================#
 @client.event 
 async def on_message(message):
@@ -71,7 +72,7 @@ async def on_message(message):
 #=======================================# sus 
     if 'sus' in msg:
         await message.channel.send('sus!!!')
-        print(f'sus      {round(client.latency*1000)}ms')
+        await cmdlog('sus')
 #=======================================# dad
     imList = ['i\'m ','im ','i am ']
     for im in imList:
@@ -80,13 +81,13 @@ async def on_message(message):
             if len(msgList) > 1: person = msgList[1]
             else: person = msgList[0]
             await message.channel.send('hi ' + person +', '+im+'dad!')
-            print(f'imdad    {round(client.latency*1000)}ms')
+            await cmdlog('imdad')
             return
 #=======================================#
 @client.command()
 async def ping(ping): #pong!
     await ping.send(f'pong! {round(client.latency*1000)}ms')
-    print(f'pong!    {round(client.latency*1000)}ms')
+    await cmdlog('pong!')
 #=======================================#
 @client.command(aliases =['8ball']) #an 8ball command idk
 async def _8ball(ctx,*,question):
@@ -95,7 +96,7 @@ async def _8ball(ctx,*,question):
                   'Ask again later.','Better not tell you now.','Cannot predict now.','Concentrate and ask again.',
                   'Don\'t count on it.','My reply is no.','My sources say no.','Outlook not so good.','Very doubtful.']
     await ctx.send(f'```Question: {question}\nAnswer: {random.choice(responses)}```')
-    print(f'8ball    {round(client.latency*1000)}ms')
+    await cmdlog('8ball')
 #=======================================#
 @client.command() 
 async def uwu(ctx,*,text):
@@ -111,31 +112,31 @@ async def uwu(ctx,*,text):
         if (letter == 'n' or letter == 'N') and text[letternum+1] in vowels: text = text[0:letternum+1]+'y'+text[letternum+1:len(text)]
         letternum+=1
     await ctx.send(f'{text}')
-    print(f'uwu      {round(client.latency*1000)}ms')
+    await cmdlog('uwu')
 #=======================================#
 @client.command() 
 async def echo(ctx,*,text):
     await ctx.send(text)
-    print(f'echo     {round(client.latency*1000)}ms')
+    await cmdlog('echo')
 #=======================================#
 @client.command(pass_context=True) 
 async def pingme(ctx):
     await ctx.send('will do!')
-    print(f'pingme0  {round(client.latency*1000)}ms')
+    await cmdlog('pingme1')
     await asyncio.sleep(random.randint(300,1200))
     await ctx.send(ctx.message.author.mention)
-    print(f'pingme1  {round(client.latency*1000)}ms')
+    await cmdlog('pingme2')
 #=======================================#
 @client.command()
 async def bubblewrap(ctx,*,pop='pop'):
     await ctx.send(("|| "+pop+" ||") * int(2000/((len(pop)+6))))
-    print(f'bwrap    {round(client.latency*1000)}ms')
+    await cmdlog('bwrap')
 #=======================================#
 @client.command()
 async def flip(ctx):
     coin = ['heads','tails']
     await ctx.send(f'you flipped {random.choice(coin)}!')
-    print(f'flip     {round(client.latency*1000)}ms')
+    await cmdlog('flip')
 #=======================================#
 async def shuffleImages(imglist, folder):
     imglist = os.listdir(f'.\\'+folder)
@@ -150,7 +151,7 @@ async def meme(ctx): #memes yeyeye
     global memelist
     global memecounters
     (memecounters[ctx.channel.id], memelist) = await sendImage(ctx, memelist, memecounters, 'your meme, good lad', 'memes')
-    print(f'meme     {round(client.latency*1000)}ms')
+    await cmdlog('meme')
 #=======================================#
 cutelist = []
 cutecounters = {}
@@ -159,7 +160,7 @@ async def cute(ctx): #kittens yeyeye
     global cutelist
     global cutecounters
     (cutecounters[ctx.channel.id], cutelist) = await sendImage(ctx, cutelist, cutecounters, 'your cute image, good lad', 'cute')
-    print(f'cute     {round(client.latency*1000)}ms')
+    await cmdlog('cute')
 #=======================================#
 async def sendImage(ctx, imagelist, counters, message, folder):
     id = ctx.channel.id
@@ -185,12 +186,12 @@ async def imageNum(directory):
 @client.command() #command to add  m e m e s
 async def addmeme(ctx, link = ''):
     await addimage(ctx, link, 'memes')
-    print(f'addmeme  {round(client.latency*1000)}ms')
+    await cmdlog('addmeme')
 #=======================================#
 @client.command() #command to add  m e m e s
 async def addcute(ctx, link = ''):
     await addimage(ctx, link, 'cute')
-    print(f'addcute  {round(client.latency*1000)}ms')
+    await cmdlog('addcute')
 #=======================================#
 async def image(ctx, sent, folder, message):
     await ctx.send(message,file=discord.File('.\\'+folder+'\\'+sent))
@@ -200,11 +201,9 @@ async def addimage(ctx, link, folder):
     headers={'User-Agent':user_agent,}
     if ctx.message.attachments: link = ctx.message.attachments[0].url
     islink = False
-
     if link:
         for end in filestuff:
             if end in link[len(link)-len(end):len(link)]: islink = True
-
     if islink:
         request=urllib.request.Request(link, None, headers)
         response = urllib.request.urlopen(request)
@@ -214,7 +213,6 @@ async def addimage(ctx, link, folder):
         newImg.write(data)
         newImg.close()
         await ctx.send('```your media has been added to the collection :)```')
-
     else: await ctx.send('```woah there buckaroo, not so fast. we only want media attachments and links in these parts, \'yahear.```')
 #=======================================#
 chambers = {}
@@ -228,45 +226,50 @@ async def roulette(ctx):
     if pos == 0: await ctx.send('```bang!```')
     else: await ctx.send('```click...```')
     chambers[id]-=1
-    print(f'roulette {round(client.latency*1000)}ms')
+    await cmdlog(roulette)
 #=======================================#
 @client.command()
 async def roulettespin(ctx):
     global chambers
     chambers[ctx.channel.id] = random.randint(0,5)
     await ctx.send('```haha chamber go spin```')
-    print(f'spin     {round(client.latency*1000)}ms')
+    await cmdlog('spin')
+#=======================================#
+async def inputAsync(prompt: str = ''):
+    with ThreadPoolExecutor(1, 'ainput') as executor:
+        return (await asyncio.get_event_loop().run_in_executor(executor, input, prompt)).rstrip()
 #=======================================#
 funkytime = False
 @client.command()
 async def botcontrol(ctx):
     global funkytime
+    await cmdlog('control')
     while funkytime:
-        msg = input()
+        msg = inputAsync()
         await ctx.send(msg)
 #=======================================#
 @client.command()
 async def invite(ctx):
     link = 'https://discord.com/oauth2/authorize?client_id=459165488572792832&scope=bot'
     await ctx.send('okay, here ya go! ^-^\n'+link)
-    print(f'invite   {round(client.latency*1000)}ms')
+    await cmdlog('invite')
 #=======================================#
 @client.command()
 async def sourcecode(ctx):
     link = 'https://github.com/radicalspaghetti/Aespir'
     await ctx.send('okay, here ya go! ^-^\n'+link)
-    print(f'source   {round(client.latency*1000)}ms')
+    await cmdlog('source')
 #=======================================#
 @client.command()
 async def roulettebutwithasemiautomaticpistol(ctx): 
     await ctx.send('```bang!```')
-    print(f'rip lmao {round(client.latency*1000)}ms')
+    await cmdlog('rip lmao')
 #=======================================#
 @client.command()
 async def pp(ctx, userString = None): 
     if not userString: await ctx.send('here be your pp, my good lad: 8'+('='*random.randint(1,20)+')'))
     else: await ctx.send('here be '+userString+'\'s pp, my good lad: 8'+('='*random.randint(1,20)+')'))
-    print(f'pp       {round(client.latency*1000)}ms')
+    await cmdlog('pp')
 #=======================================#
 @client.command(pass_context=True)
 async def gay(ctx,*,userString = None):
@@ -281,7 +284,7 @@ async def gay(ctx,*,userString = None):
     else: await ctx.send(userString + ' is ' + str(num) +'%'+ ' gay')
     #if not userString: await ctx.send('```you are '+ str(100) +'%'+ ' gay```')
     #else: await ctx.send('```'+ userString + ' is ' + str(100) +'%'+ ' gay```')
-    print(f'gay      {round(client.latency*1000)}ms')
+    await cmdlog('gay')
 #=======================================#
 @client.command(pass_context=True)
 async def whoami(ctx):
@@ -290,7 +293,7 @@ async def whoami(ctx):
 async def hellfireLoop(ctx, message):
     await ctx.send(message)
     await asyncio.sleep(5)
-    print('lmao')
+    await cmdlog('lol')
 #=====================#
 @client.command()
 async def hellfire(ctx,passwordinp,*,message = 'something fun'):
@@ -329,6 +332,9 @@ def clientrun():
         client.run(token)
     except Exception:
         input('error, most likely bad token passed. press enter to exit.')
+#=======================================#
+async def cmdlog(msg):
+    print(msg+' '*((8-len(msg))+1)+str(round(client.latency*1000))+'ms')
 #=======================================#
 clientrun()
 #=======================================#
