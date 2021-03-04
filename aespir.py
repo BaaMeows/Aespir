@@ -17,9 +17,6 @@ client = commands.Bot(command_prefix = PREFIX)
 user_agent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
 #=======================================#
 filestuff = ['.gif','.png','.jpg','.mov','.mp4','.mp3','.webp']
-#escape_dict={'\b':r'','\c':r'','\f':r'','\n':r'','\r':r'','\t':r'','\v':r'',
- #            '\'':r'','\"':r'','\0':r'','\1':r'','\2':r'',
-  #           '\3':r'','\4':r'','\5':r'','\6':r'','\7':r'','\8':r'','\9':r''}
 escape_dict={'\n':r''}
 memecounter = 0
 #=======================================#
@@ -29,18 +26,15 @@ def raw(text):
     for char in text:
         try: new_string+=escape_dict[char]
         except KeyError: new_string+=char
-    #new_string = new_string[:-3]
     return new_string
 #=======================================#
 @client.event
 async def on_ready():
     await client.change_presence(activity=discord.Game(name="my prefix is a squiggly"))
     #await client.change_presence(activity=discord.CustomActivity(name="my prefix is a squiggly line"))
+    #await shuffleImages(memelist, 'memes')
+    #await shuffleImages(cutelist, 'cute')
     print('Aespir is ready')
-
-    await shuffleImages(memecounter,memelist, 'memes')
-    await shuffleImages(cutecounter,cutelist, 'cute')
-#=======================================#
 #=======================================#
 client.remove_command('help')
 @client.command()
@@ -143,32 +137,39 @@ async def flip(ctx):
     await ctx.send(f'you flipped {random.choice(coin)}!')
     print(f'flip     {round(client.latency*1000)}ms')
 #=======================================#
-async def shuffleImages(counter, imglist, folder):
+async def shuffleImages(imglist, folder):
     imglist = os.listdir(f'.\\'+folder)
-    counter = 0
     random.shuffle(imglist)
     print('shuffled the '+folder)
-    return(counter, imglist)
+    return(imglist)
 #=======================================#
 memelist = []
-memecounter = 0
+memecounters = {}
 @client.command()
 async def meme(ctx): #memes yeyeye
     global memelist
-    global memecounter
-    if memecounter >= len(memelist)-2: 
-        memecounter, memelist = await shuffleImages(memecounter,memelist, 'memes')
-    memecounter = await image(ctx,memelist,memecounter,'memes','meme')
+    global memecounters
+    (memecounters[ctx.channel.id], memelist) = await sendImage(ctx, memelist, memecounters, 'your meme, good lad', 'memes')
+    print(f'meme     {round(client.latency*1000)}ms')
 #=======================================#
 cutelist = []
-cutecounter = 0
+cutecounters = {}
 @client.command()
 async def cute(ctx): #kittens yeyeye
     global cutelist
-    global cutecounter
-    if cutecounter >= len(cutelist)-2: 
-        cutecounter, cutelist = await shuffleImages(cutecounter,cutelist, 'cute')
-    cutecounter = await image(ctx,cutelist,cutecounter,'cute','cute image')
+    global cutecounters
+    (cutecounters[ctx.channel.id], cutelist) = await sendImage(ctx, cutelist, cutecounters, 'your cute image, good lad', 'cute')
+    print(f'cute     {round(client.latency*1000)}ms')
+#=======================================#
+async def sendImage(ctx, imagelist, counters, message, folder):
+    id = ctx.channel.id
+    if id not in counters: counters[id]=0
+    if counters[id] >= len(imagelist): 
+        counters[id] = 0
+        imagelist = await shuffleImages(imagelist, folder)
+    else: counters[id]+=1
+    await ctx.send(message,file=discord.File('.\\'+folder+'\\'+imagelist[counters[id]]))
+    return counters[id], imagelist
 #=======================================#
 async def imageNum(directory):
     num = 0
@@ -188,11 +189,8 @@ async def addcute(ctx, link = ''):
     await addimage(ctx, link, 'cute')
     print(f'addcute  {round(client.latency*1000)}ms')
 #=======================================#
-async def image(ctx, imglist, counter, folder, word):
-    sent = imglist[counter]
-    await ctx.send('your '+word+', good lad',file=discord.File('.\\'+folder+'\\'+sent))
-    print(f'{word.split()[0]}     {round(client.latency*1000)}ms')
-    return counter + 1
+async def image(ctx, sent, folder, message):
+    await ctx.send(message,file=discord.File('.\\'+folder+'\\'+sent))
 #=======================================#
 async def addimage(ctx, link, folder):
     global user_agent 
