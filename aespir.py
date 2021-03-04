@@ -64,7 +64,8 @@ pp (nice pp)
 gay {message (optional)} (gay)
 pingme (pings you after a randomized timer. why would you use this?????)
 whoami (for testing)
-invite (yes pls)```''')
+invite (yes pls)
+sourcecode (i'm open source!)```''')
     print(f'help     {round(client.latency*1000)}ms')
 #=======================================#
 @client.event 
@@ -246,8 +247,14 @@ async def botcontrol(ctx):
 @client.command()
 async def invite(ctx):
     link = 'https://discord.com/oauth2/authorize?client_id=459165488572792832&scope=bot'
-    await ctx.send('```okay, here ya go! ^-^```'+link)
+    await ctx.send('okay, here ya go! ^-^\n'+link)
     print(f'invite   {round(client.latency*1000)}ms')
+#=======================================#
+@client.command()
+async def sourcecode(ctx):
+    link = 'https://github.com/radicalspaghetti/Aespir'
+    await ctx.send('okay, here ya go! ^-^\n'+link)
+    print(f'source   {round(client.latency*1000)}ms')
 #=======================================#
 @client.command()
 async def roulettebutwithasemiautomaticpistol(ctx): 
