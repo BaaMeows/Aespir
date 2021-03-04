@@ -185,7 +185,7 @@ async def addmeme(ctx, link = ''):
     await addimage(ctx, link, 'memes')
     await cmdlog('addmeme')
 #=======================================#
-@client.command() #command to add  m e m e s
+@client.command() #command to add  c u t e  i m a g e s
 async def addcute(ctx, link = ''):
     await addimage(ctx, link, 'cute')
     await cmdlog('addcute')
@@ -261,26 +261,30 @@ async def roulettebutwithasemiautomaticpistol(ctx): # do not do this
     await ctx.send('```bang!```')
     await cmdlog('rip')
 #=======================================#
-@client.command()
+@client.command(pass_context=True)
 async def pp(ctx, userString = None): 
-    if not userString: await ctx.send('here be your pp, my good lad: 8'+('='*random.randint(1,20)+')'))
-    else: await ctx.send('here be '+userString+'\'s pp, my good lad: 8'+('='*random.randint(1,20)+')'))
+    if userString == None: userString = ctx.message.author.mention
+    random.seed(userString)
+    rand = int(random.random()*20)
+    if userString == ctx.message.author.mention: await ctx.send('here be your pp, my good lad: 8'+('='*rand+')'))
+    else: await ctx.send('here be '+userString+'\'s pp, my good lad: 8'+('='*rand+')'))
     await cmdlog('pp')
 #=======================================#
 @client.command(pass_context=True)
 async def gay(ctx,*,userString = None):
-    if not userString: userString = str(ctx.message.author.name)
+    if userString == None: userString = str(ctx.message.author.mention)
     random.seed(userString)
     num = int(random.random()*100)
     if num >= 95: num = 100
     if num <= 5: num = 0
-    if not userString: await ctx.send('```you are '+ str(num) +'%'+ ' gay```')
+    if userString == ctx.message.author.mention: await ctx.send('you are '+ str(num) +'%'+ ' gay')
     else: await ctx.send(userString + ' is ' + str(num) +'%'+ ' gay')
     await cmdlog('gay')
 #=======================================#
 @client.command(pass_context=True)
 async def whoami(ctx):
     await ctx.send('you are '+ ctx.message.author.name + ", id "+ str(ctx.message.author.id))
+    cmdlog('whoami')
 #=======================================# an absolute garbage command
 async def hellfireLoop(ctx, message):
     await ctx.send(message)
