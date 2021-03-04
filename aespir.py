@@ -167,9 +167,8 @@ async def sendImage(ctx, imagelist, counters, message, folder):
         counters[id]=0
         imagelist = await shuffleImages(imagelist, folder)
     counter = counters[id]
-    print(counter)
     await ctx.send(message,file=discord.File('.\\'+folder+'\\'+imagelist[counter]))
-    if counter >= len(imagelist): 
+    if counter >= len(imagelist)-1: 
         counter = 0
         imagelist = await shuffleImages(imagelist, folder)
     else: counter+=1
