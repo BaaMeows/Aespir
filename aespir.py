@@ -38,9 +38,11 @@ async def on_message(message):
     if message.author == client.user: return
     msg = message.content.lower()
 #=======================================# sus (an evil command. wretched.)
-    if 'sus' in msg:
-        await message.channel.send('sus!!!')
-        await cmdlog('sus')
+    sus = ['sus','among us','among','amogus','amogos','vent','imposter']
+    for word in sus:
+        if word in msg:
+            await message.channel.send('sus!!!')
+            await cmdlog('sus')
 #=======================================# dad
     dadmsg = msg.replace(",","")
     imList = ['i\'m ','im ','i am ']
@@ -203,7 +205,6 @@ async def addimage(ctx, link, folder):
         request=urllib.request.Request(link, None, headers)
         response = urllib.request.urlopen(request)
         data = response.read()
-        #newImg = open('.\memes\\'+(str(len(os.listdir('.\memes'))+1)+'.'+link.split('.')[-1]), "wb")
         newImg = open('.\\'+folder+'\\'+str(await imageNum('.\\'+folder))+'.'+link.split('.')[-1], "wb")
         newImg.write(data)
         newImg.close()
@@ -256,9 +257,9 @@ async def sourcecode(ctx):
     await cmdlog('source')
 #=======================================#
 @client.command()
-async def roulettebutwithasemiautomaticpistol(ctx): 
+async def roulettebutwithasemiautomaticpistol(ctx): # do not do this
     await ctx.send('```bang!```')
-    await cmdlog('rip lmao')
+    await cmdlog('rip')
 #=======================================#
 @client.command()
 async def pp(ctx, userString = None): 
