@@ -1,28 +1,22 @@
-#Tyler Dolph, Jaden Torres 2019-2020
+#Tyler Dolph 2019-2021
 #=======================================#
 import discord
 from discord.ext import commands
 import random
 import time
 import os, os.path
-from os import walk
 import urllib.request
-import base64
 import asyncio
-import re
 from concurrent.futures import ThreadPoolExecutor
 #=======================================#
-INF = 2147483647
 PREFIX = '~'
 client = commands.Bot(command_prefix = PREFIX)
 user_agent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
 #=======================================#
 filestuff = ['.gif','.png','.jpg','.mov','.mp4','.mp3','.webp']
 escape_dict={'\n':r''}
-memecounter = 0
 #=======================================#
-def raw(text):
-    #gets rid of unfresh and unrad characters that we don't want
+def raw(text): #gets rid of unfresh and unrad characters that we don't want
     new_string=''
     for char in text:
         try: new_string+=escape_dict[char]
@@ -37,10 +31,32 @@ async def on_ready():
     #await shuffleImages(cutelist, 'cute')
     print('Aespir is ready')
 #=======================================#
+@client.event 
+async def on_message(message):
+    await client.process_commands(message)
+#=======================================#
+    if message.author == client.user: return
+    msg = message.content.lower()
+#=======================================# sus (an evil command. wretched.)
+    if 'sus' in msg:
+        await message.channel.send('sus!!!')
+        await cmdlog('sus')
+#=======================================# dad
+    dadmsg = msg.replace(",","")
+    imList = ['i\'m ','im ','i am ']
+    for im in imList:
+        if im in dadmsg:
+            msgList = dadmsg.split(im)
+            if len(msgList) > 1: person = msgList[1]
+            else: person = msgList[0]
+            await message.channel.send('hi ' + person +', '+im+'dad!')
+            await cmdlog('imdad')
+            return
+#=======================================#
 client.remove_command('help')
 @client.command()
-async def help(ctx): #a custom yet garbage help command
-    await ctx.send('''```aespir v0.4, prefix \''''+PREFIX+''''\n---\ncommands:
+async def help(ctx): #note: maybe move to a text file
+    await ctx.send('''```aespir v0.4, prefix \''''+PREFIX+''''\n---\ncommands: 
 ping (pong!)
 flip (a coin)
 8ball {your question}
@@ -63,33 +79,12 @@ invite (yes please)
 sourcecode (i'm open source!)```''')
     await cmdlog('help')
 #=======================================#
-@client.event 
-async def on_message(message):
-    await client.process_commands(message)
-#=======================================#
-    if message.author == client.user: return
-    msg = message.content.lower().replace(",","")
-#=======================================# sus 
-    if 'sus' in msg:
-        await message.channel.send('sus!!!')
-        await cmdlog('sus')
-#=======================================# dad
-    imList = ['i\'m ','im ','i am ']
-    for im in imList:
-        if im in msg:
-            msgList = msg.split(im)
-            if len(msgList) > 1: person = msgList[1]
-            else: person = msgList[0]
-            await message.channel.send('hi ' + person +', '+im+'dad!')
-            await cmdlog('imdad')
-            return
-#=======================================#
 @client.command()
 async def ping(ping): #pong!
     await ping.send(f'pong! {round(client.latency*1000)}ms')
     await cmdlog('pong!')
 #=======================================#
-@client.command(aliases =['8ball']) #an 8ball command idk
+@client.command(aliases =['8ball'])
 async def _8ball(ctx,*,question):
     responses = [ 'It is certain.','It is decidedly so.','Without a doubt.','Yes - definitely.','You may rely on it.',
                   'As I see it, yes.','Most likely.','Outlook good.','Yes.','Signs point to yes.','Reply hazy, try again.',
@@ -99,7 +94,7 @@ async def _8ball(ctx,*,question):
     await cmdlog('8ball')
 #=======================================#
 @client.command() 
-async def uwu(ctx,*,text):
+async def uwu(ctx,*,text): #I wrote this one awhile ago and can barely read it. I will never touch it again, it is too scary.
     replaceWithW=['l','r']
     vowels = ['a','e','i','o','u']
     for letter in replaceWithW: 
@@ -276,28 +271,24 @@ async def gay(ctx,*,userString = None):
     if not userString: userString = str(ctx.message.author.name)
     random.seed(userString)
     num = int(random.random()*100)
-    #num = random.randint(0,101)
-    #num = random.seed(ord(userString[0]))
     if num >= 95: num = 100
     if num <= 5: num = 0
     if not userString: await ctx.send('```you are '+ str(num) +'%'+ ' gay```')
     else: await ctx.send(userString + ' is ' + str(num) +'%'+ ' gay')
-    #if not userString: await ctx.send('```you are '+ str(100) +'%'+ ' gay```')
-    #else: await ctx.send('```'+ userString + ' is ' + str(100) +'%'+ ' gay```')
     await cmdlog('gay')
 #=======================================#
 @client.command(pass_context=True)
 async def whoami(ctx):
     await ctx.send('you are '+ ctx.message.author.name + ", id "+ str(ctx.message.author.id))
-#=======================================#
+#=======================================# an absolute garbage command
 async def hellfireLoop(ctx, message):
     await ctx.send(message)
     await asyncio.sleep(5)
     await cmdlog('lol')
-#=====================#
+#=====================# 
 @client.command()
 async def hellfire(ctx,passwordinp,*,message = 'something fun'):
-    hellfile = open("hellpassword.txt","r+") #get the token from token.txt
+    hellfile = open("hellpassword.txt","r+")
     passwords = ''
     read_line = 'sansundertale'
     password = raw(str(hellfile.readline()))
@@ -321,20 +312,32 @@ async def hellfire(ctx,passwordinp,*,message = 'something fun'):
         await ctx.send('```hellfire denied.```')
         hellfile.close()
 #=======================================#
-tokenfile = open("token.txt","r") #get the token from token.txt
-token = tokenfile.readline()
-tokenfile.close()
-def clientrun():
-    global token
-    #print('connecting with token '+token)
-    print('connecting...')
-    try:
-        client.run(token)
-    except Exception:
-        input('error, most likely bad token passed. press enter to exit.')
-#=======================================#
 async def cmdlog(msg):
     print(msg+' '*((8-len(msg))+1)+str(round(client.latency*1000))+'ms')
 #=======================================#
-clientrun()
-#=======================================#
+tokenfile = open("token.txt","r") 
+token = tokenfile.readline()
+tokenfile.close()
+print('connecting...')
+try: client.run(token)
+except Exception: input('error, most likely bad token passed. press enter to exit.')
+
+#
+#░░░░░░░░░░░▄▀▄▀▀▀▀▄▀▄░░░░░░░░░░░░░░░░░░ 
+#░░░░░░░░░░░█░░░░░░░░▀▄░░░░░░▄░░░░░░░░░░ 
+#░░░░░░░░░░█░░▀░░▀░░░░░▀▄▄░░█░█░░░░░░░░░ 
+#░░░░░░░░░░█░▄░█▀░▄░░░░░░░▀▀░░█░░░░░░░░░ 
+#░░░░░░░░░░█░░▀▀▀▀░░░░░░░░░░░░█░░░░░░░░░ 
+#░░░░░░░░░░█░░░░░░░░░░░░░░░░░░█░░░░░░░░░ 
+#░░░░░░░░░░█░░░░░░░░░░░░░░░░░░█░░░░░░░░░ 
+#░░░░░░░░░░░█░░▄▄░░▄▄▄▄░░▄▄░░█░░░░░░░░░░ 
+#░░░░░░░░░░░█░▄▀█░▄▀░░█░▄▀█░▄▀░░░░░░░░░░ 
+#░░░░░░░░░░░░▀░░░▀░░░░░▀░░░▀░░░░░░░░░░░░ 
+#╔═════════════════════════════════════╗
+#║ * You feel like you're going to     ║
+#║ have a ruff time.                   ║
+#║                                     ║
+#╚═════════════════════════════════════╝
+#┌───────┐ ┌───────┐ ┌───────┐ ┌───────┐
+#│/ FIGHT| │ ) PET | |6 ITEM | |X MERCY| 
+#└───────┘ └───────┘ └───────┘ └───────┘
