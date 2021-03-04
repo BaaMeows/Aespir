@@ -163,13 +163,17 @@ async def cute(ctx): #kittens yeyeye
 #=======================================#
 async def sendImage(ctx, imagelist, counters, message, folder):
     id = ctx.channel.id
-    if id not in counters: counters[id]=0
-    if counters[id] >= len(imagelist): 
-        counters[id] = 0
+    if id not in counters:
+        counters[id]=0
         imagelist = await shuffleImages(imagelist, folder)
-    else: counters[id]+=1
-    await ctx.send(message,file=discord.File('.\\'+folder+'\\'+imagelist[counters[id]]))
-    return counters[id], imagelist
+    counter = counters[id]
+    print(counter)
+    await ctx.send(message,file=discord.File('.\\'+folder+'\\'+imagelist[counter]))
+    if counter >= len(imagelist): 
+        counter = 0
+        imagelist = await shuffleImages(imagelist, folder)
+    else: counter+=1
+    return counter, imagelist
 #=======================================#
 async def imageNum(directory):
     num = 0
