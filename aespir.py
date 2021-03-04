@@ -34,7 +34,7 @@ def raw(text):
 #=======================================#
 @client.event
 async def on_ready():
-    await client.change_presence(activity=discord.Game(name="my prefix is a squiggly line"))
+    await client.change_presence(activity=discord.Game(name="my prefix is a squiggly"))
     #await client.change_presence(activity=discord.CustomActivity(name="my prefix is a squiggly line"))
     print('Aespir is ready')
 
@@ -52,19 +52,19 @@ flip (a coin)
 echo {your message}
 uwu {your text} (uwu)
 meme (yes)
-addmeme {media attachment or link}
+addmeme {media attachment or link} (more memes!!!)
 cute (absolutely)
-addcute {media attachment or link}
-bubblewrap {custom message, defaults to pop}
-hellfire {password} {custom message, defaults to something fun}
+addcute {media attachment or link} (more puppies!!!)
+bubblewrap {custom message, defaults to pop} (hehe)
+hellfire {password} {custom message, defaults to something fun} (NO)
 roulette (russian!)
 roulettespin (spins the chamber, if you're into that sort of thing)
-roulettebutwithasemiautomaticpistol (uh)
-pp (nice pp)
-gay {message (optional)} (gay)
+roulettebutwithasemiautomaticpistol (not a good idea)
+pp (nice)
+gay {message (optional)} (gay gay homosexual gay)
 pingme (pings you after a randomized timer. why would you use this?????)
 whoami (for testing)
-invite (yes pls)
+invite (yes please)
 sourcecode (i'm open source!)```''')
     print(f'help     {round(client.latency*1000)}ms')
 #=======================================#
