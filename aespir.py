@@ -88,6 +88,7 @@ async def _8ball(ctx,*,question):
                   'As I see it, yes.','Most likely.','Outlook good.','Yes.','Signs point to yes.','Reply hazy, try again.',
                   'Ask again later.','Better not tell you now.','Cannot predict now.','Concentrate and ask again.',
                   'Don\'t count on it.','My reply is no.','My sources say no.','Outlook not so good.','Very doubtful.']
+    random.seed(question)
     await ctx.send(f'```Question: {question}\nAnswer: {random.choice(responses)}```')
     await cmdlog('8ball')
 #=======================================# I wrote this one awhile ago and can barely read it. I will never touch it again, it is too scary.
