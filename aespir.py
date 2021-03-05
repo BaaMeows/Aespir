@@ -3,9 +3,6 @@
 import discord
 from discord import FFmpegPCMAudio
 from discord.ext import commands
-from discord.utils import get
-import ffmpeg
-from discord.ext import commands
 import random
 import time
 import os, os.path
@@ -22,18 +19,10 @@ TOKEN = data['token']
 #=======================================# funky variables
 user_agent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
 filestuff = ['.gif','.png','.jpg','.mov','.mp4','.mp3','.webp']
-escape_dict={'\n':r''}
 start=time.time()
 client = commands.Bot(command_prefix = PREFIX)
 #=======================================# counters
 totalCommands = 0
-#=======================================# gets rid of unfresh and unrad characters that we don't want
-def raw(text):
-    new_string=''
-    for char in text:
-        try: new_string+=escape_dict[char]
-        except KeyError: new_string+=char
-    return new_string
 #=======================================# yeehaw
 @client.event
 async def on_ready():
@@ -305,11 +294,6 @@ async def gay(ctx,*,userString = None):
 async def whoami(ctx):
     await ctx.send('you are '+ ctx.message.author.name + ", id "+ str(ctx.message.author.id))
     cmdlog('whoami')
-#=======================================# an absolute garbage command
-async def hellfireLoop(ctx, message):
-    await ctx.send(message)
-    await asyncio.sleep(5)
-    await cmdlog('lol')
 #=======================================# voice channel stuff
 @client.command()
 async def join(ctx):
