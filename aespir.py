@@ -97,14 +97,14 @@ async def ping(ping):
 #=======================================# fancy
 @client.command(pass_context=True)
 async def stats(ping):
-    await ping.send(f'''```system stats ---
+    await ping.send(f'''```system stats-----
     hostname: {socket.gethostname()}
     latency: {round(client.latency*1000)}ms
     uptime: {time.strftime("%H:%M:%S", time.gmtime(time.time() - psutil.boot_time()))}
     CPU: {psutil.cpu_percent()}%
     RAM: {psutil.virtual_memory().percent}%
     public ip: 7
-bot stats    ---
+bot stats--------
     client: {client.user}
     runtime: {time.strftime("%H:%M:%S", time.gmtime(time.time() - start))}
     commands since startup: {totalCommands}
@@ -310,32 +310,6 @@ async def hellfireLoop(ctx, message):
     await ctx.send(message)
     await asyncio.sleep(5)
     await cmdlog('lol')
-#=====================# garbage in both form and function
-@client.command()
-async def hellfire(ctx,passwordinp,*,message = 'something fun'):
-    hellfile = open("hellpassword.txt","r+")
-    passwords = ''
-    read_line = 'sansundertale'
-    password = raw(str(hellfile.readline()))
-    while read_line != '':
-        read_line = raw(str(hellfile.readline()))
-        passwords += read_line.replace(' ','') + '\n'
-    if passwordinp == password and password != '':
-        await ctx.send('```hellfire accepted. commencing...```')
-        print(f'hellfire {round(client.latency*1000)}ms')
-        hellfile.truncate(0)
-        hellfile.seek(0)
-        hellfile.write(passwords)
-        hellfile.close()
-        coros = [hellfireLoop(ctx,message) for _ in range(100)]
-        await asyncio.gather(*coros)
-    elif password == '':
-        await ctx.send('```hellfire denied, no password set.```')
-        hellfile.close()
-        print(f'hellfire denied, no password set. set one in hellfire.txt.')
-    else:
-        await ctx.send('```hellfire denied.```')
-        hellfile.close()
 #=======================================# voice channel stuff
 @client.command()
 async def join(ctx):
