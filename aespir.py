@@ -1,6 +1,10 @@
 #Tyler Dolph 2019-2021
 #=======================================#
 import discord
+from discord import FFmpegPCMAudio
+from discord.ext import commands
+from discord.utils import get
+import ffmpeg
 from discord.ext import commands
 import random
 import time
@@ -8,13 +12,21 @@ import os, os.path
 import urllib.request
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
-#=======================================# configurable variables
-PREFIX = '~'
+import psutil
+import socket
+import json
+#=======================================# from data.json
+with open('data.json') as file: data = json.load(file)
+PREFIX = data['prefix']
+TOKEN = data['token']
 #=======================================# funky variables
-client = commands.Bot(command_prefix = PREFIX)
 user_agent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
 filestuff = ['.gif','.png','.jpg','.mov','.mp4','.mp3','.webp']
 escape_dict={'\n':r''}
+start=time.time()
+client = commands.Bot(command_prefix = PREFIX)
+#=======================================# counters
+totalCommands = 0
 #=======================================# gets rid of unfresh and unrad characters that we don't want
 def raw(text):
     new_string=''
@@ -35,7 +47,7 @@ async def on_message(message):
     if message.author == client.user: return
     msg = message.content.lower()
 #=======================================# sus (an evil command. wretched.)
-    sus = ['sus','among us','among','amogus','amogos','vent','imposter']
+    sus = ['sus','among','amogus','amogos','vent','imposter']
     for word in sus:
         if word in msg:
             await message.channel.send('sus!!!')
@@ -57,6 +69,7 @@ client.remove_command('help')
 async def help(ctx):
     await ctx.send('''```aespir v0.4, prefix \''''+PREFIX+''''\n---\ncommands: 
 ping (pong!)
+stats (for nerds!)
 flip (a coin)
 8ball {your question}
 echo {your message}
@@ -81,6 +94,22 @@ sourcecode (i'm open source!)```''')
 async def ping(ping):
     await ping.send(f'pong! {round(client.latency*1000)}ms')
     await cmdlog('pong!')
+#=======================================# fancy
+@client.command(pass_context=True)
+async def stats(ping):
+    await ping.send(f'''```system stats ---
+    hostname: {socket.gethostname()}
+    latency: {round(client.latency*1000)}ms
+    uptime: {time.strftime("%H:%M:%S", time.gmtime(time.time() - psutil.boot_time()))}
+    CPU: {psutil.cpu_percent()}%
+    RAM: {psutil.virtual_memory().percent}%
+    public ip: 7
+bot stats    ---
+    client: {client.user}
+    runtime: {time.strftime("%H:%M:%S", time.gmtime(time.time() - start))}
+    commands since startup: {totalCommands}
+    currently active in {len(client.guilds)} servers```''')
+    await cmdlog('stats')
 #=======================================# oooOOOOOOooooooO
 @client.command(aliases =['8ball'])
 async def _8ball(ctx,*,question):
@@ -132,43 +161,44 @@ async def flip(ctx):
     await ctx.send(f'you flipped {random.choice(coin)}!')
     await cmdlog('flip')
 #=======================================# shuffles a list of images. gets them from the folder to add any new ones
-async def shuffleImages(imglist, folder):
+async def shuffleImages(folder):
     imglist = os.listdir(f'.\\'+folder)
     random.shuffle(imglist)
     print('shuffled the '+folder)
     return(imglist)
 #=======================================# there are some good ones in there
-memelist = []
+memelists = {}
 memecounters = {}
 @client.command()
 async def meme(ctx): #memes yeyeye
-    global memelist
+    global memelists
     global memecounters
-    (memecounters[ctx.channel.id], memelist) = await sendImage(ctx, memelist, memecounters, 'your meme, good lad', 'memes')
+    (memecounters[ctx.channel.id], memelists[ctx.channel.id]) = await sendImage(ctx, memelists, memecounters, 'your meme, good lad', 'memes')
     await cmdlog('meme')
 #=======================================# kittens!
-cutelist = []
+cutelists = {}
 cutecounters = {}
 @client.command()
 async def cute(ctx): #kittens yeyeye
-    global cutelist
+    global cutelists
     global cutecounters
-    (cutecounters[ctx.channel.id], cutelist) = await sendImage(ctx, cutelist, cutecounters, 'your cute image, good lad', 'cute')
+    (cutecounters[ctx.channel.id], cutelists[ctx.channel.id]) = await sendImage(ctx, cutelists, cutecounters, 'your cute image, good lad', 'cute')
     await cmdlog('cute')
-#=======================================# uh
-async def sendImage(ctx, imagelist, counters, message, folder):
+#=======================================# the guts of ~cute and ~meme
+async def sendImage(ctx, lists, counters, message, folder):
     id = ctx.channel.id
     if id not in counters:
         counters[id]=0
-        imagelist = await shuffleImages(imagelist, folder)
+        lists[id] = await shuffleImages(folder)
+    imagelist = lists[id]
     counter = counters[id]
     await ctx.send(message,file=discord.File('.\\'+folder+'\\'+imagelist[counter]))
     if counter >= len(imagelist)-1: 
         counter = 0
-        imagelist = await shuffleImages(imagelist, folder)
+        imagelist = await shuffleImages(folder)
     else: counter+=1
     return counter, imagelist
-#=======================================# I wrote this a year ago and have no idea what it does. help
+#=======================================# gets a good number to name an image for ~addmeme and ~addcute
 async def imageNum(directory):
     num = 0
     for img in os.listdir(directory):
@@ -213,13 +243,13 @@ chambers = {}
 async def roulette(ctx):
     global chambers
     id = ctx.channel.id
-    if id not in chambers: chambers[id]=-1
+    if id not in chambers: chambers[id] = -1
     pos = chambers[id]
     if pos < 0: pos = random.randint(0,5)
     if pos == 0: await ctx.send('```bang!```')
     else: await ctx.send('```click...```')
     chambers[id]-=1
-    await cmdlog(roulette)
+    await cmdlog('roulette')
 #=======================================# brr
 @client.command()
 async def roulettespin(ctx):
@@ -227,19 +257,20 @@ async def roulettespin(ctx):
     chambers[ctx.channel.id] = random.randint(0,5)
     await ctx.send('```haha chamber go spin```')
     await cmdlog('spin')
-#=======================================# async input, only used for botcontrol as of yet
+#=======================================# async terminal input, only used for botcontrol so far
 async def inputAsync(prompt: str = ''):
     with ThreadPoolExecutor(1, 'ainput') as executor:
         return (await asyncio.get_event_loop().run_in_executor(executor, input, prompt)).rstrip()
-#=======================================# gaming
-funkytime = False
+#=======================================# botcontrol, name is funky to avoid copying. idk, this is mostly for me to mess around with.
 @client.command()
-async def botcontrol(ctx):
-    global funkytime
+async def vjirnblisiahnvoia(ctx,*,password = ''):
     await cmdlog('control')
-    while funkytime:
-        msg = inputAsync()
-        await ctx.send(msg)
+    if(password == ''): 
+        await ctx.message.delete()
+        while True:
+            msg = await inputAsync()
+            if msg == "exit": break
+            await ctx.send(msg)
 #=======================================# yes.
 @client.command()
 async def invite(ctx):
@@ -261,8 +292,9 @@ async def roulettebutwithasemiautomaticpistol(ctx):
 @client.command(pass_context=True)
 async def gay(ctx,*,userString = None):
     if userString == None: userString = str(ctx.message.author.mention)
-    random.seed(userString)
-    num = int(random.random()*100)
+    userString = userString.replace('!','')
+    random.seed(userString+userString)
+    num = int(random.random()*101)
     if num > 95: num = 100
     if num < 5: num = 0
     if userString == ctx.message.author.mention: await ctx.send('you are '+ str(num) +'%'+ ' gay')
@@ -304,15 +336,27 @@ async def hellfire(ctx,passwordinp,*,message = 'something fun'):
     else:
         await ctx.send('```hellfire denied.```')
         hellfile.close()
+#=======================================# voice channel stuff
+@client.command()
+async def join(ctx):
+    channel = ctx.author.voice.channel
+    await channel.connect()
+    voice = discord.VoiceClient = discord.utils.get(client.voice_clients, guild=ctx.guild)
+    voice.play(discord.FFmpegPCMAudio('RobotRock.mp3'), after=lambda e:  print('done', e))
+    await cmdlog('join')
+#=======================================#
+@client.command()
+async def leave(ctx):
+    await ctx.voice_client.disconnect(force=True)
+    await cmdlog('leave')
 #=======================================# very poggers
 async def cmdlog(msg):
+    global totalCommands
+    totalCommands+=1
     print(msg+' '*((8-len(msg))+1)+str(round(client.latency*1000))+'ms')
 #=======================================# opening the token and running the client
-tokenfile = open("token.txt","r") 
-token = tokenfile.readline()
-tokenfile.close()
 print('connecting...')
-try: client.run(token)
+try: client.run(TOKEN)
 except Exception: input('error, most likely bad token passed. press enter to exit.')
 
 #
