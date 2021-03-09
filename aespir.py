@@ -16,6 +16,8 @@ import json
 with open('data.json') as file: data = json.load(file)
 PREFIX = data['prefix']
 TOKEN = data['token']
+#=======================================# from dadList.json
+with open('dadList.json') as file: nodadlist = json.load(file)
 #=======================================# funky variables
 user_agent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
 filestuff = ['.gif','.png','.jpg','.mov','.mp4','.mp3','.webp']
@@ -33,25 +35,56 @@ async def on_ready():
 @client.event 
 async def on_message(message):
     await client.process_commands(message)
+    id = message.channel.id
     if message.author == client.user: return
     msg = message.content.lower()
 #=======================================# sus (an evil command. wretched.)
-    sus = ['sus','among','amogus','amogos','vent','imposter']
-    for word in sus:
-        if word in msg:
-            await message.channel.send('sus!!!')
-            await cmdlog('sus')
+    if False:
+        susmsg = msg.replace(' ','')
+        sus = ['sus','among','amogus','amogos','vent','imposter','suus']
+        for word in sus:
+            if word in susmsg:
+                await message.channel.send('sus!!!')
+                await cmdlog('sus')
 #=======================================# dad
-    dadmsg = msg.replace(",","")
-    imList = ['i\'m ','im ','i am ']
-    for im in imList:
-        if im in dadmsg:
-            msgList = dadmsg.split(im)
-            if len(msgList) > 1: person = msgList[1]
-            else: person = msgList[0]
-            await message.channel.send('hi ' + person +', '+im+'dad!')
-            await cmdlog('imdad')
-            return
+    if(id not in nodadlist):
+        dadmsg = msg.replace(",","")
+        imList = ['i\'m ','im ','i am ']
+        for im in imList:
+            if im in dadmsg:
+                msgList = dadmsg.split(im)
+                if len(msgList) > 1: person = msgList[1]
+                else: person = msgList[0]
+                await message.channel.send('hi ' + person +', '+im+'dad!')
+                await cmdlog('imdad')
+                return
+#=======================================#
+@client.command()
+async def goawaydad(ctx):
+    id = ctx.channel.id
+    if id in nodadlist:
+        await ctx.send("he's already gone, lad")
+        await cmdlog('gad (fail)')
+        return
+    nodadlist.append(id)
+    await dumpJson('dadList.json',nodadlist)
+    await ctx.send(f'bye {ctx.message.author.name}, i\'m dad!')
+    await cmdlog('gad')
+#=======================================#
+@client.command()
+async def comebackdad(ctx):
+    id = ctx.channel.id
+    if id not in nodadlist:
+        await ctx.send("dad is already enabled in this channel, silly!")
+        await cmdlog('cbd (fail)')
+        return
+    nodadlist.remove(id)
+    await dumpJson('dadList.json',nodadlist)
+    await ctx.send(f'hi {ctx.message.author.name}, i\'m dad!')
+    await cmdlog('cbd')
+#=======================================#
+async def dumpJson(filename, data):
+    with open(filename, 'w') as f: json.dump(data, f)
 #=======================================# note: maybe move to a text file
 client.remove_command('help')
 @client.command()
@@ -75,6 +108,8 @@ roulettebutwithasemiautomaticpistol (not a good idea)
 gay {message (optional)} (gay gay homosexual gay)
 pingme (pings you after a randomized timer. why would you use this?????)
 whoami (was for testing, left it in)
+goawaydad (removes dad jokes)
+comebackdad (brings back dad jokes)
 invite (yes please)
 sourcecode (i'm open source!)```''')
     await cmdlog('help')
@@ -89,7 +124,7 @@ async def stats(ping):
     await ping.send(f'''```system stats-----
     hostname: {socket.gethostname()}
     latency: {round(client.latency*1000)}ms
-    uptime: {time.strftime("%H:%M:%S", time.gmtime(time.time() - psutil.boot_time()))}
+    uptime: {time.strftime("%H:%M:%S", time.gmtime(psutil.boot_time()))}
     CPU: {psutil.cpu_percent()}%
     RAM: {psutil.virtual_memory().percent}%
     public ip: 7
@@ -173,6 +208,11 @@ async def cute(ctx): #kittens yeyeye
     global cutecounters
     (cutecounters[ctx.channel.id], cutelists[ctx.channel.id]) = await sendImage(ctx, cutelists, cutecounters, 'your cute image, good lad', 'cute')
     await cmdlog('cute')
+#=======================================#
+@client.command()
+async def shit(ctx):
+    await ctx.send(f'you take a shit.\n\nYOUR SHIT:\nlength (inches): {random.randint(1,9)}\nwidth (inches): {random.randint(1,4)}\nenjoyment (1-10 scale): {random.randint(1,10)}\nflushability (1-10 scale) {random.randint(1,10)}')
+    await cmdlog('shit')
 #=======================================# the guts of ~cute and ~meme
 async def sendImage(ctx, lists, counters, message, folder):
     id = ctx.channel.id
@@ -297,16 +337,37 @@ async def whoami(ctx):
 #=======================================# voice channel stuff
 @client.command()
 async def join(ctx):
+    #if(connected(ctx)): leave()
     channel = ctx.author.voice.channel
     await channel.connect()
-    voice = discord.VoiceClient = discord.utils.get(client.voice_clients, guild=ctx.guild)
-    voice.play(discord.FFmpegPCMAudio('RobotRock.mp3'), after=lambda e:  print('done', e))
+    #voice = discord.utils.get(client.voice_clients, guild=ctx.guild)
+    #voice.play(discord.FFmpegPCMAudio('RobotRock.mp3'), after=lambda e:  print('done', e))
+    #voice.disconnect()
     await cmdlog('join')
+#=======================================#
+@client.command()
+async def rock(ctx):
+    if(await connected(ctx) == False):
+        await cmdlog('rockfail')
+        return 
+    voice = discord.utils.get(client.voice_clients, guild=ctx.guild)
+    voice.play(discord.FFmpegPCMAudio('RobotRock.mp3'), after=lambda e:  print('done'))
+    await cmdlog('rock')
+#=======================================#
+@client.command()
+async def stop(ctx):
+    voice = discord.utils.get(client.voice_clients, guild=ctx.guild)
+    voice.stop()
+    await cmdlog('stop')
 #=======================================#
 @client.command()
 async def leave(ctx):
     await ctx.voice_client.disconnect(force=True)
     await cmdlog('leave')
+#=======================================#
+async def connected(ctx):
+    if discord.utils.get(client.voice_clients, guild=ctx.guild) == None: return False
+    return True
 #=======================================# very poggers
 async def cmdlog(msg):
     global totalCommands
