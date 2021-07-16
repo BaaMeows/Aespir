@@ -1,11 +1,9 @@
+*.txt
+*.json
 .vs/
 .vscode/
-*.txt
 memes/*
 cute/*
-data.json
 !*.exe
 !memes/
 !cute/
-data.json
-*.json
