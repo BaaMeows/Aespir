@@ -20,7 +20,7 @@ TOKEN = data['token']
 with open('dadList.json') as file: nodadlist = json.load(file)
 #=======================================# funky variables
 user_agent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
-filestuff = ['.gif','.png','.jpg','.mov','.mp4','.mp3','.webp']
+filestuff = ['.gif','.png','.jpg','.mov','.mp4','.mp3','.webp','.webP','.jpeg','.webm']
 start=time.time()
 client = commands.Bot(command_prefix = PREFIX)
 #=======================================# counters
@@ -39,7 +39,7 @@ async def on_message(message):
     if message.author == client.user: return
     msg = message.content.lower()
 #=======================================# sus (an evil command. wretched.)
-    if False:
+    if False: # no.
         susmsg = msg.replace(' ','')
         sus = ['sus','among','amogus','amogos','vent','imposter','suus']
         for word in sus:
@@ -58,7 +58,11 @@ async def on_message(message):
                 await message.channel.send('hi ' + person +', '+im+'dad!')
                 await cmdlog('imdad')
                 return
-#=======================================#
+#=======================================# <3
+    emoji = '❤️'
+    if('aespir' in msg): 
+        await message.add_reaction(emoji)
+        await cmdlog(emoji)
 @client.command()
 async def goawaydad(ctx):
     id = ctx.channel.id
@@ -89,7 +93,7 @@ async def dumpJson(filename, data):
 client.remove_command('help')
 @client.command()
 async def help(ctx):
-    await ctx.send('''```aespir v0.4, prefix \''''+PREFIX+''''\n---\ncommands: 
+    await ctx.send('''```Aespir v0.5, prefix \''''+PREFIX+''''\n---\ncommands: 
 ping (pong!)
 stats (for nerds!)
 flip (a coin)
@@ -100,18 +104,17 @@ meme (yes)
 addmeme {media attachment or link} (more memes!!!)
 cute (absolutely)
 addcute {media attachment or link} (more puppies!!!)
-bubblewrap {custom message, defaults to pop} (hehe)
+pop {custom message, defaults to pop} (hehe)
 hellfire {password} {custom message, defaults to something fun} (NO)
 roulette (russian!)
 roulettespin (spins the chamber, if you're into that sort of thing)
 roulettebutwithasemiautomaticpistol (not a good idea)
-gay {message (optional)} (gay gay homosexual gay)
+gay {message (optional)} (gay gay homosexual gay, yay!)
 pingme (pings you after a randomized timer. why would you use this?????)
-whoami (was for testing, left it in)
 goawaydad (removes dad jokes)
 comebackdad (brings back dad jokes)
 invite (yes please)
-sourcecode (i'm open source!)```''')
+sourcecode (goodie!)```''')
     await cmdlog('help')
 #=======================================# pong!
 @client.command()
@@ -119,12 +122,12 @@ async def ping(ping):
     await ping.send(f'pong! {round(client.latency*1000)}ms')
     await cmdlog('pong!')
 #=======================================# fancy
+#uptime: {time.strftime("%H:%M:%S", psutil.boot_time())}
 @client.command(pass_context=True)
 async def stats(ping):
     await ping.send(f'''```system stats-----
     hostname: {socket.gethostname()}
     latency: {round(client.latency*1000)}ms
-    uptime: {time.strftime("%H:%M:%S", time.gmtime(psutil.boot_time()))}
     CPU: {psutil.cpu_percent()}%
     RAM: {psutil.virtual_memory().percent}%
     public ip: 7
@@ -134,7 +137,7 @@ bot stats--------
     commands since startup: {totalCommands}
     currently active in {len(client.guilds)} servers```''')
     await cmdlog('stats')
-#=======================================# oooOOOOOOooooooO
+#=======================================#
 @client.command(aliases =['8ball'])
 async def _8ball(ctx,*,question):
     responses = [ 'It is certain.','It is decidedly so.','Without a doubt.','Yes - definitely.','You may rely on it.',
@@ -144,7 +147,7 @@ async def _8ball(ctx,*,question):
     random.seed(question)
     await ctx.send(f'```Question: {question}\nAnswer: {random.choice(responses)}```')
     await cmdlog('8ball')
-#=======================================# I wrote this one awhile ago and can barely read it. I will never touch it again, it is too scary.
+#=======================================# terrifying
 @client.command() 
 async def uwu(ctx,*,text):
     replaceWithW=['l','r']
@@ -160,7 +163,7 @@ async def uwu(ctx,*,text):
         letternum+=1
     await ctx.send(f'{text}')
     await cmdlog('uwu')
-#=======================================# makes the bot say things
+#=======================================# 
 @client.command() 
 async def echo(ctx,*,text):
     await ctx.send(text)
@@ -175,7 +178,7 @@ async def pingme(ctx):
     await cmdlog('pingme2')
 #=======================================# pop
 @client.command()
-async def bubblewrap(ctx,*,pop='pop'):
+async def pop(ctx,*,pop='pop'):
     await ctx.send(("|| "+pop+" ||") * int(2000/((len(pop)+6))))
     await cmdlog('bwrap')
 #=======================================# a coin! the first command that I made, besides ping, I think.
@@ -190,14 +193,14 @@ async def shuffleImages(folder):
     random.shuffle(imglist)
     print('shuffled the '+folder)
     return(imglist)
-#=======================================# there are some good ones in there
+#=======================================# there are some good ones in there, i think
 memelists = {}
 memecounters = {}
 @client.command()
 async def meme(ctx): #memes yeyeye
     global memelists
     global memecounters
-    (memecounters[ctx.channel.id], memelists[ctx.channel.id]) = await sendImage(ctx, memelists, memecounters, 'your meme, good lad', 'memes')
+    (memecounters[ctx.channel.id], memelists[ctx.channel.id]) = await sendImage(ctx, memelists, memecounters, 'your meme, good lad', 'memes', spoiler=False)
     await cmdlog('meme')
 #=======================================# kittens!
 cutelists = {}
@@ -206,22 +209,18 @@ cutecounters = {}
 async def cute(ctx): #kittens yeyeye
     global cutelists
     global cutecounters
-    (cutecounters[ctx.channel.id], cutelists[ctx.channel.id]) = await sendImage(ctx, cutelists, cutecounters, 'your cute image, good lad', 'cute')
+    (cutecounters[ctx.channel.id], cutelists[ctx.channel.id]) = await sendImage(ctx, cutelists, cutecounters, 'your cute image, good lad', 'cute', spoiler=False)
     await cmdlog('cute')
-#=======================================#
-@client.command()
-async def shit(ctx):
-    await ctx.send(f'you take a shit.\n\nYOUR SHIT:\nlength (inches): {random.randint(1,9)}\nwidth (inches): {random.randint(1,4)}\nenjoyment (1-10 scale): {random.randint(1,10)}\nflushability (1-10 scale) {random.randint(1,10)}')
-    await cmdlog('shit')
 #=======================================# the guts of ~cute and ~meme
-async def sendImage(ctx, lists, counters, message, folder):
+async def sendImage(ctx, lists, counters, message, folder, spoiler):
     id = ctx.channel.id
     if id not in counters:
         counters[id]=0
         lists[id] = await shuffleImages(folder)
     imagelist = lists[id]
     counter = counters[id]
-    await ctx.send(message,file=discord.File('.\\'+folder+'\\'+imagelist[counter]))
+    filename = '.\\'+folder+'\\'+imagelist[counter]
+    await ctx.send(message,file = discord.File(filename, spoiler=spoiler))
     if counter >= len(imagelist)-1: 
         counter = 0
         imagelist = await shuffleImages(folder)
@@ -245,6 +244,12 @@ async def addmeme(ctx, link = ''):
 async def addcute(ctx, link = ''):
     await addimage(ctx, link, 'cute')
     await cmdlog('addcute')
+#=======================================#
+async def nsfwCheck(ctx):
+    if isinstance(ctx.channel, discord.channel.DMChannel) or ctx.channel.is_nsfw(): return True
+    await ctx.send('sorry pardner, you need to be in a NSFW channel to use this command!')
+    await cmdlog('nsfwFail')
+    return False
 #=======================================# embeds images for ~meme and ~cute
 async def image(ctx, sent, folder, message):
     await ctx.send(message,file=discord.File('.\\'+folder+'\\'+sent))
@@ -270,37 +275,44 @@ async def addimage(ctx, link, folder):
 chambers = {}
 @client.command(pass_context=True)
 async def roulette(ctx):
+    #if not await nsfwCheck(ctx): return
     global chambers
     id = ctx.channel.id
-    if id not in chambers: chambers[id] = -1
-    pos = chambers[id]
-    if pos < 0: pos = random.randint(0,5)
-    if pos == 0: await ctx.send('```bang!```')
-    else: await ctx.send('```click...```')
-    chambers[id]-=1
+    if id not in chambers: chambers[id] = random.randint(0,5)
+    if chambers[id] <= 0:
+        await ctx.send('```bang!```')
+        chambers[id] = random.randint(0,5)
+    else: 
+        await ctx.send('```click...```')
+        chambers[id]-=1
     await cmdlog('roulette')
 #=======================================# brr
 @client.command()
 async def roulettespin(ctx):
+    if not await nsfwCheck(ctx): return
     global chambers
     chambers[ctx.channel.id] = random.randint(0,5)
     await ctx.send('```haha chamber go spin```')
     await cmdlog('spin')
-#=======================================# async terminal input, only used for botcontrol so far
+#=======================================# async terminal input, only exclusively for pranks
 async def inputAsync(prompt: str = ''):
     with ThreadPoolExecutor(1, 'ainput') as executor:
         return (await asyncio.get_event_loop().run_in_executor(executor, input, prompt)).rstrip()
-#=======================================# botcontrol, name is funky to avoid copying. idk, this is mostly for me to mess around with.
-@client.command()
-async def vjirnblisiahnvoia(ctx,*,password = ''):
-    await cmdlog('control')
-    if(password == ''): 
-        await ctx.message.delete()
-        while True:
-            msg = await inputAsync()
-            if msg == "exit": break
-            await ctx.send(msg)
-#=======================================# yes.
+
+
+#=======================================# prank'd
+#@client.command()
+#async def vjirnblisiahnvoia(ctx,*,password = ''):
+#    await cmdlog('control')
+#    if(password == ''): 
+#        await ctx.message.delete()
+#        while True:
+#            msg = await inputAsync()
+#            if msg == "exit": break
+#            await ctx.send(msg)
+
+
+#=======================================# yes
 @client.command()
 async def invite(ctx):
     link = 'https://discord.com/oauth2/authorize?client_id=459165488572792832&scope=bot'
@@ -315,6 +327,7 @@ async def sourcecode(ctx):
 #=======================================# do not do this
 @client.command()
 async def roulettebutwithasemiautomaticpistol(ctx):
+    if not await nsfwCheck(ctx): return
     await ctx.send('```bang!```')
     await cmdlog('rip')
 #=======================================# very scientific
@@ -329,12 +342,12 @@ async def gay(ctx,*,userString = None):
     if userString == ctx.message.author.mention: await ctx.send('you are '+ str(num) +'%'+ ' gay')
     else: await ctx.send(userString + ' is ' + str(num) +'%'+ ' gay')
     await cmdlog('gay')
-#=======================================# was for testing purposes; i'll just keep it in
+#=======================================# was for testing purposes. i dont have the heart to delete it
 @client.command(pass_context=True)
 async def whoami(ctx):
     await ctx.send('you are '+ ctx.message.author.name + ", id "+ str(ctx.message.author.id))
     cmdlog('whoami')
-#=======================================# voice channel stuff
+#=======================================# voice channel stuff. im working on it. probably
 @client.command()
 async def join(ctx):
     #if(connected(ctx)): leave()
@@ -369,14 +382,17 @@ async def connected(ctx):
     if discord.utils.get(client.voice_clients, guild=ctx.guild) == None: return False
     return True
 #=======================================# very poggers
+doCmdlog = True
 async def cmdlog(msg):
-    global totalCommands
-    totalCommands+=1
-    print(msg+' '*((8-len(msg))+1)+str(round(client.latency*1000))+'ms')
+    global doCmdlog
+    if doCmdlog:
+        global totalCommands
+        totalCommands+=1
+        print(msg+' '*((8-len(msg))+1)+str(round(client.latency*1000))+'ms')
 #=======================================# opening the token and running the client
 print('connecting...')
 try: client.run(TOKEN)
-except Exception: input('error, most likely bad token passed. press enter to exit.')
+except Exception: input("FATAL ERROR: cannot run client, most likely a bad token\npress enter to exit\n") # very spooky error message
 
 #
 #░░░░░░░░░░░▄▀▄▀▀▀▀▄▀▄░░░░░░░░░░░░░░░░░░ 
