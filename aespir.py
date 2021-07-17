@@ -12,6 +12,7 @@ from concurrent.futures import ThreadPoolExecutor
 import psutil
 import socket
 import json
+import sys
 #=======================================# from data.json
 with open('data.json') as file: data = json.load(file)
 PREFIX = data['prefix']
@@ -31,6 +32,7 @@ async def on_ready():
     await client.change_presence(activity=discord.Game(name="my prefix is a squiggly"))
     #await client.change_presence(activity=discord.CustomActivity(name="my prefix is a squiggly line"))
     print('Aespir is ready')
+    await inputLoop()
 #=======================================# note: maybe move sus and dad to seperate functions. maybe.
 @client.event 
 async def on_message(message):
@@ -104,7 +106,6 @@ addmeme {media attachment or link} (more memes!!!)
 cute (absolutely)
 addcute {media attachment or link} (more puppies!!!)
 pop {custom message, defaults to pop} (hehe)
-hellfire {password} {custom message, defaults to something fun} (NO)
 roulette (russian!)
 roulettespin (spins the chamber, if you're into that sort of thing)
 roulettebutwithasemiautomaticpistol (not a good idea)
@@ -245,10 +246,10 @@ async def addcute(ctx, link = ''):
     await cmdlog('addcute')
 #=======================================#
 async def nsfwCheck(ctx):
-    if isinstance(ctx.channel, discord.channel.DMChannel) or ctx.channel.is_nsfw(): return True
+    if isinstance(ctx.channel, discord.channel.DMChannel) or ctx.channel.is_nsfw(): return False
     await ctx.send('sorry pardner, you need to be in a NSFW channel to use this command!')
     await cmdlog('nsfwFail')
-    return False
+    return True
 #=======================================# embeds images for ~meme and ~cute
 async def image(ctx, sent, folder, message):
     await ctx.send(message,file=discord.File('.\\'+folder+'\\'+sent))
@@ -274,7 +275,7 @@ async def addimage(ctx, link, folder):
 chambers = {}
 @client.command(pass_context=True)
 async def roulette(ctx):
-    if not await nsfwCheck(ctx): return
+    if await nsfwCheck(ctx): return
     global chambers
     id = ctx.channel.id
     if id not in chambers: chambers[id] = random.randint(0,5)
@@ -288,29 +289,21 @@ async def roulette(ctx):
 #=======================================# brr
 @client.command()
 async def roulettespin(ctx):
-    if not await nsfwCheck(ctx): return
+    if await nsfwCheck(ctx): return
     global chambers
     chambers[ctx.channel.id] = random.randint(0,5)
     await ctx.send('```haha chamber go spin```')
     await cmdlog('spin')
-#=======================================# async terminal input, only exclusively for pranks
+#=======================================# do not do this
+@client.command()
+async def roulettebutwithasemiautomaticpistol(ctx):
+    if await nsfwCheck(ctx): return
+    await ctx.send('```bang!```')
+    await cmdlog('rip')
+#=======================================# async terminal input
 async def inputAsync(prompt: str = ''):
     with ThreadPoolExecutor(1, 'ainput') as executor:
         return (await asyncio.get_event_loop().run_in_executor(executor, input, prompt)).rstrip()
-
-
-#=======================================# prank'd
-#@client.command()
-#async def vjirnblisiahnvoia(ctx,*,password = ''):
-#    await cmdlog('control')
-#    if(password == ''): 
-#        await ctx.message.delete()
-#        while True:
-#            msg = await inputAsync()
-#            if msg == "exit": break
-#            await ctx.send(msg)
-
-
 #=======================================# yes
 @client.command()
 async def invite(ctx):
@@ -323,12 +316,6 @@ async def sourcecode(ctx):
     link = 'https://github.com/radicalspaghetti/Aespir'
     await ctx.send('okay, here ya go! ^-^\n'+link)
     await cmdlog('source')
-#=======================================# do not do this
-@client.command()
-async def roulettebutwithasemiautomaticpistol(ctx):
-    if not await nsfwCheck(ctx): return
-    await ctx.send('```bang!```')
-    await cmdlog('rip')
 #=======================================# very scientific
 @client.command(pass_context=True)
 async def gay(ctx,*,userString = None):
@@ -388,6 +375,21 @@ async def cmdlog(msg):
         global totalCommands
         totalCommands+=1
         print(msg+' '*((8-len(msg))+1)+str(round(client.latency*1000))+'ms')
+#=======================================#
+async def inputLoop():
+    while True:
+        inp = await inputAsync()
+        if("control" in inp):
+            id = int(inp[8:])
+            channel = client.get_channel(id)
+            print("now controlling bot in channel "+ str(id))
+            while True:
+                msg = await inputAsync()
+                if msg == "stop":
+                    print("no longer controlling bot in channel "+ str(id))
+                    break
+                await channel.send(msg)
+        if("exit" in inp): sys.exit()
 #=======================================# opening the token and running the client
 print('connecting...')
 try: client.run(TOKEN)
