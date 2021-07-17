@@ -1,4 +1,5 @@
 # Aespir
+
 Tyler Dolph 2019-2021
 
 a simple bot i'm working on. it'll do simple bot things. the simple life.
@@ -8,7 +9,7 @@ feel free to use this for anything.
 you'll python3 with discord.py.
 (put your bot token in data.json)
 
-current invite link > https://discord.com/oauth2/authorize?client_id=459165488572792832&scope=bot
+current invite link: <https://discord.com/oauth2/authorize?client_id=459165488572792832&scope=bot>
 
 bot commands:
     ping: basic ping command, also returns ping speed in ms
