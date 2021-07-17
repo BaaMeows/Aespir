@@ -39,13 +39,12 @@ async def on_message(message):
     if message.author == client.user: return
     msg = message.content.lower()
 #=======================================# sus (an evil command. wretched.)
-    if False: # no.
-        susmsg = msg.replace(' ','')
-        sus = ['sus','among','amogus','amogos','vent','imposter','suus']
-        for word in sus:
-            if word in susmsg:
-                await message.channel.send('sus!!!')
-                await cmdlog('sus')
+    susmsg = " "+msg+" "
+    sus = [' sus ',' among us ',' amogus ',' amogos ',' impostor ',' imposter ',' suus ', ' sussy ']
+    for word in sus:
+        if word in susmsg:
+            await message.channel.send('STOP POSTING ABOUT AMONG US')
+            await cmdlog('sus')
 #=======================================# dad
     if(id not in nodadlist):
         dadmsg = msg.replace(",","")
@@ -68,24 +67,24 @@ async def goawaydad(ctx):
     id = ctx.channel.id
     if id in nodadlist:
         await ctx.send("he's already gone, lad")
-        await cmdlog('gad (fail)')
+        await cmdlog('dadaway f')
         return
     nodadlist.append(id)
     await dumpJson('dadList.json',nodadlist)
     await ctx.send(f'bye {ctx.message.author.name}, i\'m dad!')
-    await cmdlog('gad')
+    await cmdlog('dadaway')
 #=======================================#
 @client.command()
 async def comebackdad(ctx):
     id = ctx.channel.id
     if id not in nodadlist:
         await ctx.send("dad is already enabled in this channel, silly!")
-        await cmdlog('cbd (fail)')
+        await cmdlog('dadback f')
         return
     nodadlist.remove(id)
     await dumpJson('dadList.json',nodadlist)
     await ctx.send(f'hi {ctx.message.author.name}, i\'m dad!')
-    await cmdlog('cbd')
+    await cmdlog('dadback')
 #=======================================#
 async def dumpJson(filename, data):
     with open(filename, 'w') as f: json.dump(data, f)
@@ -275,7 +274,7 @@ async def addimage(ctx, link, folder):
 chambers = {}
 @client.command(pass_context=True)
 async def roulette(ctx):
-    #if not await nsfwCheck(ctx): return
+    if not await nsfwCheck(ctx): return
     global chambers
     id = ctx.channel.id
     if id not in chambers: chambers[id] = random.randint(0,5)
