@@ -94,27 +94,39 @@ async def dumpJson(filename, data):
 client.remove_command('help')
 @client.command()
 async def help(ctx):
-    await ctx.send('''```Aespir v0.5, prefix \''''+PREFIX+''''\n---\ncommands: 
-ping (pong!)
-stats (for nerds!)
+    await ctx.send('''***#=======================================#***
+Aespir v0.5.2, spagoogi#5559 2019-2021\nprefix: '''+PREFIX+'''\n
+***--- recreational discordbottery***
 flip (a coin)
 8ball {your question}
 echo {your message}
 uwu {your text} (uwu)
+pop {custom message, defaults to pop} (hehe)
+gay {message (optional)} (gay gay homosexual gay, yay!)
+pingme (pings you after a randomized timer. why would you use this?????)
+
+***--- bot health and other boring tidbits***
+ping (pong!)
+stats (for nerds!)
+goawaydad (removes dad jokes)
+comebackdad (brings back dad jokes)
+help (you're using it right now!!)
+
+***--- media commands***
 meme (yes)
 addmeme {media attachment or link} (more memes!!!)
 cute (absolutely)
 addcute {media attachment or link} (more puppies!!!)
-pop {custom message, defaults to pop} (hehe)
+
+***--- NSFW channel only***
 roulette (russian!)
 roulettespin (spins the chamber, if you're into that sort of thing)
 roulettebutwithasemiautomaticpistol (not a good idea)
-gay {message (optional)} (gay gay homosexual gay, yay!)
-pingme (pings you after a randomized timer. why would you use this?????)
-goawaydad (removes dad jokes)
-comebackdad (brings back dad jokes)
+
+***--- :D***
 invite (yes please)
-sourcecode (goodie!)```''')
+sourcecode (goodie!)
+***#=======================================#***''')
     await cmdlog('help')
 #=======================================# pong!
 @client.command()
@@ -150,16 +162,16 @@ async def _8ball(ctx,*,question):
 #=======================================# terrifying
 @client.command() 
 async def uwu(ctx,*,text):
+    text = text.lower()
     replaceWithW=['l','r']
     vowels = ['a','e','i','o','u']
-    for letter in replaceWithW: 
-        text = text.replace(letter, 'w')
-        text = text.replace(letter.upper(), 'W')
+    for letter in replaceWithW: text = text.replace(letter, 'w')
     text = text.replace('ov', 'uv')
-    text = text.replace('Ov', 'Uv')
     letternum = 0
-    for letter in text:
-        if (letter == 'n' or letter == 'N') and text[letternum+1] in vowels: text = text[0:letternum+1]+'y'+text[letternum+1:len(text)]
+    while letternum < len(text) -1:
+        letter = text[letternum]
+        nextLetter = text[letternum+1]
+        if (letter == 'n') and nextLetter in vowels: text = text[0:letternum+1]+'y'+text[letternum+1:]
         letternum+=1
     await ctx.send(f'{text}')
     await cmdlog('uwu')
