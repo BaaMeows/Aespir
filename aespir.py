@@ -33,20 +33,13 @@ async def on_ready():
     #await client.change_presence(activity=discord.CustomActivity(name="my prefix is a squiggly line"))
     print('Aespir is ready')
     await inputLoop()
-#=======================================# note: maybe move sus and dad to seperate functions. maybe.
+#=======================================# 
 @client.event 
 async def on_message(message):
     await client.process_commands(message)
     id = message.channel.id
     if message.author == client.user: return
     msg = message.content.lower()
-#=======================================# sus (an evil command. wretched.)
-    susmsg = " "+msg+" "
-    sus = [' sus ',' among us ',' amogus ',' amogos ',' impostor ',' imposter ',' suus ', ' sussy ']
-    for word in sus:
-        if word in susmsg:
-            await message.channel.send('STOP POSTING ABOUT AMONG US')
-            await cmdlog('sus')
 #=======================================# dad
     if(id not in nodadlist):
         dadmsg = msg.replace(",","")
