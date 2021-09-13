@@ -587,3 +587,4 @@ except Exception: input("FATAL ERROR: cannot run client, most likely a bad token
 #┌───────┐ ┌───────┐ ┌───────┐ ┌───────┐
 #│/ FIGHT| │ ) PET | |6 ITEM | |X MERCY| 
 #└───────┘ └───────┘ └───────┘ └───────┘
+# :D
