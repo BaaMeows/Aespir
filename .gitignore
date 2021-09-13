@@ -7,3 +7,5 @@ cute/*
 !*.exe
 !memes/
 !cute/
+dadList.json
+data.json
