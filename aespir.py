@@ -18,6 +18,7 @@ import sys
 from os import system, name
 import datetime
 import string
+import youtube_dl
 #=======================================# from data.json
 with open('data.json') as file: data = json.load(file)
 PREFIX = data['prefix']
@@ -26,17 +27,18 @@ TOKEN = data['token']
 with open('dadList.json') as file: nodadlist = json.load(file)
 #=======================================# funky variables
 user_agent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
-filestuff = ['gif','png','jpg','mov','mp4','mp3','webp','webP','jpeg','webm']
 start=time.time()
 client = commands.Bot(command_prefix = PREFIX)
 channel = NULL #channel that's being watched in the terminal
+loop = asyncio.get_event_loop()
 #=======================================# counters
 totalCommands = 0
+TotalMp3s = 0
 #=======================================# yeehaw
 @client.event
 async def on_ready():
-    await client.change_presence(activity=discord.Game(name="my prefix is a squiggly"))
-    #await client.change_presence(activity=discord.CustomActivity(name="my prefix is a squiggly line"))
+    await client.change_presence(activity=discord.Game(name="music!"))
+    #await client.change_presence(activity=discord.Activity(name="my prefix is a squiggly line"))
     print('Aespir is ready')
     await inputLoop()
 #=======================================# 
@@ -61,7 +63,7 @@ async def on_message(message):
                 if len(msgList) > 1: person = msgList[1]
                 else: person = msgList[0]
                 await message.channel.send('hi ' + person +', '+im+'dad!')
-                await cmdlog('imdad')
+                await cmdlog("i'm dad")
                 return
 #=======================================# <3
     emoji = '❤️'
@@ -101,7 +103,7 @@ client.remove_command('help')
 @client.command()
 async def help(ctx):
 
-    embed=discord.Embed(title="Aespir v0.5.3, spagoogi#5559 2019-2021, prefix: "+PREFIX, url="https://discord.com/oauth2/authorize?client_id=459165488572792832&scope=bot",
+    embed=discord.Embed(title="Aespir v0.6.2, spagoogi#5559 2019-2021, prefix: "+PREFIX, url="https://discord.com/oauth2/authorize?client_id=459165488572792832&scope=bot",
     description='''***--- recreational discordbottery***
 flip (a coin)
 8ball {your question}
@@ -110,22 +112,33 @@ uwu {your text} (uwu)
 pop {custom message, defaults to pop} (hehe)
 gay {message (optional)} (gay gay homosexual gay, yay!)
 pingme (pings you after a randomized timer. why would you use this?????)
+quote {user} {message} (find when they said boobie!)
+quoteall {user} (slooooooooooooooooooow)
 
 ***--- media commands***
+download [d] {link or media attachment} (sends you an mp3)
 meme (yes)
 addmeme {media attachment} (more memes!!!)
 cute (absolutely)
 addcute {media attachment} (more puppies!!!)
 
+***--- voice commands*** (new! :D)
+join  [j] {voice channel ID, optional} (joins a VC)
+leave [l] (leaves the currently joined VC in this server)
+play  [p,a] {link or media attachment} (plays a song!)
+queue [q] (shows the server's current queue)
+skip  [s] {song #, optional} (skips a song in the queue)
+
 ***--- bot health and other boring tidbits***
 ping (pong!)
-stats (for nerds!)
-help (you're using it right now!!)
+stats (for nerds)
+help (you're using it right now!!11!!!!1!1!)
 
 ***--- NSFW channel only***
 roulette (russian!)
 roulettespin (spins the chamber, if you're into that sort of thing)
 roulettebutwithasemiautomaticpistol (not a good idea)
+owo
 
 ***--- admin only***
 goawaydad (removes dad jokes, per channel)
@@ -144,6 +157,185 @@ async def ping(ping):
     await ping.send(f'pong! {round(client.latency*1000)}ms')
     await cmdlog('pong!')
 #=======================================# yes!!!!!
+queues = {}
+
+ydl_options = {
+    'format': 'bestaudio/best',
+    'outtmpl': '%(extractor)s-%(id)s-%(title)s.%(ext)s',
+    'restrictfilenames': True,
+    'noplaylist': True,
+    'nocheckcertificate': True,
+    'ignoreerrors': False,
+    'logtostderr': False,
+    'quiet': True,
+    'no_warnings': True,
+    'default_search': 'auto',
+    'source_address': '0.0.0.0', # bind to ipv4 since ipv6 addresses cause issues sometimes
+    #'postprocessors': [{ #optional but outputs mp3s instead of webms if we need them at some point
+    #    'key': 'FFmpegExtractAudio',
+    #    'preferredcodec': 'mp3',
+    #    'preferredquality': '256',
+    #}]
+}
+
+ffmpeg_options = { 'options': '-vn' }
+
+ydl = youtube_dl.YoutubeDL(ydl_options)
+
+class ydlSource(discord.PCMVolumeTransformer):
+    def __init__(self, source, *, data, volume=0.5):
+        super().__init__(source, volume)
+
+        self.data = data
+
+        self.title = data.get('title')
+        self.url = data.get('url')
+        self.id = data.get('id')
+
+    @classmethod
+    async def from_url(cls, url, *, loop=None, stream=False, ydl = ydl):
+        loop = loop or asyncio.get_event_loop()
+        data = await loop.run_in_executor(None, lambda: ydl.extract_info(url, download=not stream))
+
+        if 'entries' in data:
+            # take first item from a playlist
+            data = data['entries'][0]
+
+        filename = data['url'] if stream else ydl.prepare_filename(data)
+        return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
+
+@client.command(aliases = ['d'])
+async def download(ctx, *, url = ''):
+    global TotalMp3s
+    await ctx.send(f'I\'m working on your file now, {ctx.message.author.name}! This could take a little while, so I\'ll ping you when it\'s ready.')
+    filename = f'aespirdownload#{TotalMp3s}.mp3'
+    TotalMp3s+=1
+    ydl_options_download = {
+        'format': 'best',
+        'outtmpl': filename,
+        'restrictfilenames': True,
+        'noplaylist': True,
+        'nocheckcertificate': True,
+        'ignoreerrors': False,
+        'logtostderr': False,
+        'quiet': True,
+        'no_warnings': True,
+        'default_search': 'auto',
+        'source_address': '0.0.0.0', # bind to ipv4 since ipv6 addresses cause issues sometimes
+        'postprocessors': [{ #outputs mp3s instead of webms
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality': '256',}]}
+    ydl_download = youtube_dl.YoutubeDL(ydl_options_download)
+    async with ctx.typing(): await ydlSource.from_url(url, stream = False, ydl = ydl_download)
+    await ctx.send(f'{ctx.message.author.mention}, here\'s your file!', file=discord.File(filename))
+    if os.path.isfile(filename): os.remove(filename)
+    await cmdlog('download')
+    
+
+@client.command(aliases =['add','p','a'])
+async def play(ctx, *, url = ''):
+    global queues
+    id = ctx.guild.id
+    if url == '' and ctx.message.attachments != NULL: 
+        content_type = ctx.message.attachments[0].content_type
+        print(f'content type: {content_type}')
+        if 'audio' not in content_type and 'video' not in content_type:
+            await ctx.send('Sorry, I can only play audio and video formats! (not images or executables. lol)')
+            return
+        url = ctx.message.attachments[0].url
+
+
+    voice = ctx.voice_client
+    if not voice: 
+        voice = await join_voice(ctx)
+        if id in queues: queues.pop(id)
+
+    async with ctx.typing(): player = await ydlSource.from_url(url, stream = True)
+    if id not in queues: queues[id] = [player]
+    else: queues[id].append(player)
+
+    text = 'Now playing'
+    if voice.is_playing(): text = 'Added to queue'
+    else: voice.play(player, after=lambda e: asyncio.run(update_queue(ctx)))
+    
+    embed=discord.Embed(title=f'{text}: {player.title}', color=0xaad5d3, url=f'https://www.youtube.com/watch?v={player.id}')
+    await ctx.send(embed=embed)
+
+    #await ctx.send(f'Now playing: {player.title} https://www.youtube.com/watch?v={queues[id][0].id}')
+
+@client.command(aliases=['j'])
+async def join(ctx, id = NULL): 
+    if id == NULL: await join_voice(ctx)
+    else: 
+        channel = client.get_channel(id)
+        await channel.connect()
+
+@client.command(aliases=['l'])
+async def leave(ctx): await ctx.voice_client.disconnect()
+
+@client.command(aliases=['s'])
+async def skip(ctx, num = 0): 
+    global queues
+    id = ctx.guild.id
+    num = int(num)
+    if id not in queues:
+        await ctx.send("There isn't anything to skip!")
+        return
+    if num > len(queues[id]) or num < 0:
+        await ctx.send("That number isn't in the queue!")
+        return
+    voice = ctx.voice_client
+    if voice and voice.is_playing():
+        song = queues[id][num]
+        embed=discord.Embed(title=f'Skipped: {song.title}', color=0xaad5d3, url=f'https://www.youtube.com/watch?v={song.id}')
+        await ctx.send(embed=embed)
+        if num == 0:
+            voice.stop()
+            await update_queue(ctx)
+        else:
+            queues[id].pop(num)
+    else: await ctx.send("There's nothing to skip!")
+
+@client.command(aliases=['q'])
+async def queue(ctx,cmd = NULL,*,dat = NULL):
+    global queues
+    id = ctx.guild.id
+    if id not in queues: 
+        await ctx.send("Sorry 'pardner, but there isn't a queue for this server yet. You can make one my adding a song with ~play!")
+        return
+    songs = queues[id]
+    outp = ""
+    for i in range(1,len(songs)):
+        song = f'{i:02d}: {songs[i].title}\n'
+        outp+=song
+        if len(outp) > 2000:
+            outp = outp[0:-len(song)]
+            break
+    embed=discord.Embed(title=f'Currently playing: {songs[0].title}', color=0xaad5d3, url=f'https://www.youtube.com/watch?v={songs[0].id}',description = outp)
+    await ctx.send(embed=embed)
+
+async def update_queue(ctx):
+    global queues
+    id = ctx.guild.id
+    if id in queues and len(queues[id]) > 1: 
+        queues[id].pop(0)
+        player = queues[id][0]
+        ctx.voice_client.stop()
+        ctx.voice_client.play(player, after=lambda e: asyncio.run(update_queue(ctx)))
+        embed=discord.Embed(title=f'Now playing: {player.title}', color=0xaad5d3, url=f'https://www.youtube.com/watch?v={player.id}')
+        await ctx.send(embed=embed)
+    elif id in queues: queues.pop(id)
+
+async def join_voice(ctx):
+    channel = ctx.author.voice.channel
+    await channel.connect()
+    return discord.utils.get(client.voice_clients, guild=ctx.guild)
+
+async def is_connected(ctx):
+    if discord.utils.get(client.voice_clients, guild=ctx.guild) == None: return False
+    return True
+
 @client.command()
 async def pet(ctx):
     data['pets'] += 1
@@ -297,11 +489,6 @@ async def addimage(ctx, link, folder):
     if ctx.message.attachments:
         link = ctx.message.attachments[0].url
         islink = True
-    #elif link and "." in link:
-    #    islink = False
-    #    fileType = link.split(".")[-1].lower()
-    #    for end in filestuff:
-    #        if end == fileType: islink = True
     if islink:
         request=urllib.request.Request(link, None, headers)
         response = urllib.request.urlopen(request)
@@ -358,31 +545,21 @@ async def sourcecode(ctx):
     await cmdlog('source')
 #=======================================# very scientific
 @client.command(pass_context=True)
-async def gay(ctx,*,userString = None):
-    if userString == None: userString = str(ctx.message.author.mention)
-    userString = userString.replace('!','')
-    random.seed(userString+userString)
+async def gay(ctx,*,input = None):
+    if input == None: input = str(ctx.message.author.mention) 
+    input = input.replace('!','')
+    random.seed(input+input)
     num = int(random.random()*101)
     if num > 95: num = 100
     if num < 1: num = 1
-    if userString == ctx.message.author.mention: await ctx.send('you are '+ str(num) +'%'+ ' gay')
-    else: await ctx.send(userString + ' is ' + str(num) +'%'+ ' gay')
+    if input == ctx.message.author.mention: await ctx.send(f'you are {num}% gay')
+    else: await ctx.send(f'{input} is {num}% gay')
     await cmdlog('gay')
 #=======================================# was for testing purposes. i dont have the heart to delete it
 @client.command(pass_context=True)
 async def whoami(ctx):
     await ctx.send('you are '+ ctx.message.author.name + ", id "+ str(ctx.message.author.id))
     cmdlog('whoami')
-#=======================================# voice channel stuff. im working on it. probably
-@client.command()
-async def join(ctx):
-    #if(connected(ctx)): leave()
-    channel = ctx.author.voice.channel
-    await channel.connect()
-    #voice = discord.utils.get(client.voice_clients, guild=ctx.guild)
-    #voice.play(discord.FFmpegPCMAudio('RobotRock.mp3'), after=lambda e:  print('done', e))
-    #voice.disconnect()
-    await cmdlog('join')
 #=======================================#
 @client.command()
 async def quoteme(ctx,*,text = ""):
@@ -444,30 +621,17 @@ async def quoteall(ctx,user: discord.User,*,text = ""):
         await ctx.send("here are your quotes! there were too many, so I put them in a file :D",file=discord.File(filename))
         os.remove(filename)
     await cmdlog("quote")
-#=======================================#
-@client.command()
-async def rock(ctx):
-    if(await connected(ctx) == False):
-        await cmdlog('rockfail')
-        return 
-    voice = discord.utils.get(client.voice_clients, guild=ctx.guild)
-    voice.play(discord.FFmpegPCMAudio('RobotRock.mp3'), after=lambda e:  print('done'))
-    await cmdlog('rock')
-#=======================================#
-@client.command()
-async def stop(ctx):
-    voice = discord.utils.get(client.voice_clients, guild=ctx.guild)
-    voice.stop()
-    await cmdlog('stop')
-#=======================================#
-@client.command()
-async def leave(ctx):
-    await ctx.voice_client.disconnect(force=True)
-    await cmdlog('leave')
-#=======================================#
-async def connected(ctx):
-    if discord.utils.get(client.voice_clients, guild=ctx.guild) == None: return False
-    return True
+#=======================================# hmmmmnnbnb
+async def on_command_error(self, ctx, error):
+    ignored = (commands.CommandNotFound, )
+    if isinstance(error, ignored): return
+    if isinstance(error, commands.DisabledCommand): await ctx.send(f'{ctx.command} is disabled!')
+    elif isinstance(error, commands.NoPrivateMessage):
+        try: await ctx.author.send(f'{ctx.command} can\'t be used in private messages!')
+        except discord.HTTPException: pass
+    elif isinstance(error, commands.BadArgument):
+        if ctx.command.qualified_name == 'tag list': await ctx.send('I couldn\'t find that member! Try again?')
+    else: print(f'ignoring exception in {ctx.command}')
 #=======================================# very poggers
 doCmdlog = True
 async def cmdlog(msg):
@@ -566,7 +730,7 @@ async def inputLoop():
 #=======================================# opening the token and running the client
 print('connecting...')
 try: client.run(TOKEN)
-except Exception: input("FATAL ERROR: cannot run client, most likely a bad token\npress enter to exit\n") # very spooky error message
+except Exception: input("cannot run client, most likely a bad token\npress enter to exit\n") # very spooky error message
 
 #
 #░░░░░░░░░░░▄▀▄▀▀▀▀▄▀▄░░░░░░░░░░░░░░░░░░ 
