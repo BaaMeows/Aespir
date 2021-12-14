@@ -357,12 +357,12 @@ async def pet(ctx):
 #uptime: {time.strftime("%H:%M:%S", psutil.boot_time())}
 @client.command(pass_context=True)
 async def stats(ctx):
-    embed=discord.Embed(title="Stats For Nerds OwO", link="https://cdn.shopify.com/s/files/1/0014/1962/products/product_DR_ralsei_plush_photo3.png?v=1550098980",
+    embed=discord.Embed(title="Stats For Nerds ÓwÒ", link="https://cdn.shopify.com/s/files/1/0014/1962/products/product_DR_ralsei_plush_photo3.png?v=1550098980",
     description=f'''***--- system stats***
 hostname: {socket.gethostname()}
 latency: {round(client.latency*1000)}ms
 CPU: {psutil.cpu_percent()}%
-core temperature: {CPUTemperature().temperature}
+core temperature: {round(CPUTemperature().temperature)}°C
 RAM: {psutil.virtual_memory().percent}%
 public ip: *ur moms bed*
 ***--- bot stats***
