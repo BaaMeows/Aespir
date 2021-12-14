@@ -742,7 +742,7 @@ async def inputLoop():
 #=======================================# opening the token and running the client
 def run():
     global Token
-    print('connecting...')
+    print(f'connecting with token {Token}')
     try: client.run(Token)
     except Exception: 
         token = input("The client can't run, probably because it has a bad token.\npress enter now to exit, or enter new token: ")
