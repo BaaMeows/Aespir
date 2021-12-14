@@ -365,18 +365,20 @@ async def stats(ctx):
     # Maybe. Possibly. Okay probably not
     if socket.gethostname() == 'raspberrypi':
         temp = round(CPUTemperature().temperature)
-    else: temp = "extra spicy"
+    else: 
+        temps = ['extra spicy', 'steamy', 'a hotplate', 'yes', 'frosty', 'ō^Õ', 'TEMPERATURE', 'NULL', '?REDO FROM START', 'help me', 'squagga', 'hellfire','−273.15', '776']
+        temp = random.choice(temps)
     
-    embed=discord.Embed(title="Stats For Nerds ÓwÒ", link="https://cdn.shopify.com/s/files/1/0014/1962/products/product_DR_ralsei_plush_photo3.png?v=1550098980",
+    embed=discord.Embed(title="Stats For Nerds ÓwÒ", url="https://cdn.shopify.com/s/files/1/0014/1962/products/product_DR_ralsei_plush_photo3.png?v=1550098980",
     description=f'''***--- system stats***
 hostname: {socket.gethostname()}
 network latency: {round(client.latency*1000)}ms
+script runtime: {time.strftime('%H:%M:%S', time.gmtime(time.time() - start))}
 CPU usage: {psutil.cpu_percent()}%
 core temperature: {temp}°C
 RAM usage: {psutil.virtual_memory().percent}%
 ipv4 address: *ur moms bed*
 ***--- bot stats***
-script runtime: {time.strftime('%H:%M:%S', time.gmtime(time.time() - start))}
 commands since startup: {totalCommands+1} 
 pets since startup: {data['pets']-STARTPETS}
 currently active in {len(client.guilds)} servers''',
