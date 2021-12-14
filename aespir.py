@@ -744,10 +744,9 @@ def run(Token):
     print(f'connecting...')
     try: client.run(Token)
     except Exception: 
-        Token = input("The client can't run, probably because it has a bad token.\npress enter now to exit, or enter new token: ")
+        Token = input("The client can't run, probably because it has a bad token.\npress enter now to exit, or enter new token now: ").strip()
         if Token != '':
             with open('token.txt', 'w') as f: json.dump(Token, f)
-            run(Token)
 run(Token)
 
 
