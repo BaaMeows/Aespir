@@ -18,7 +18,7 @@ from os import system, name, path
 import datetime
 import string
 import youtube_dl
-import wmi
+from gpiozero import CPUTemperature
 #=======================================# from data.json
 with open('data.json') as file: data = json.load(file)
 if path.isfile('token.txt'):
@@ -357,16 +357,12 @@ async def pet(ctx):
 #uptime: {time.strftime("%H:%M:%S", psutil.boot_time())}
 @client.command(pass_context=True)
 async def stats(ctx):
-    w = wmi.WMI(namespace="root\OpenHardwareMonitor")
-    temperature_infos = w.Sensor()
-    sensor = temperature_infos[0]
-
     embed=discord.Embed(title="Stats For Nerds OwO", link="https://cdn.shopify.com/s/files/1/0014/1962/products/product_DR_ralsei_plush_photo3.png?v=1550098980",
     description=f'''***--- system stats***
 hostname: {socket.gethostname()}
 latency: {round(client.latency*1000)}ms
 CPU: {psutil.cpu_percent()}%
-{sensor.Name}: {sensor.Value}
+core temperature: {CPUTemperature().temperature}
 RAM: {psutil.virtual_memory().percent}%
 public ip: *ur moms bed*
 ***--- bot stats***
