@@ -20,11 +20,11 @@ import string
 import youtube_dl
 #=======================================# from data.json
 with open('data.json') as file: data = json.load(file)
-if path.isfile('token.json'):
-    with open('token.json') as file: token = json.load(file)
+if path.isfile('token.txt'):
+    with open('token.txt') as file: token = json.load(file)
 else: 
     token = input('token: ')
-    with open('token.json', 'w') as f: json.dump([token], f)
+    with open('token.txt', 'w') as f: json.dump(token, f)
 
 TOKEN = token
 PREFIX = data['prefix']
