@@ -26,7 +26,7 @@ else:
     token = input('token: ')
     with open('token.txt', 'w') as f: json.dump(token, f)
 
-TOKEN = token
+Token = token
 PREFIX = data['prefix']
 STARTPETS = data['pets']
 COLOR = 0xaad5d3
@@ -741,12 +741,15 @@ async def inputLoop():
 
 #=======================================# opening the token and running the client
 def run():
+    global Token
     print('connecting...')
-    try: client.run(TOKEN)
+    try: client.run(Token)
     except Exception: 
-        token = input("The client can't run, probably because it has a bad token.\nnew token?:") # very spooky error message
-        with open('token.txt', 'w') as f: json.dump(token, f)
-        run()
+        token = input("The client can't run, probably because it has a bad token.\npress enter now to exit, or enter new token: ")
+        if token != '':
+            Token = token
+            with open('token.txt', 'w') as f: json.dump(token, f)
+            run()
 run()
 
 
