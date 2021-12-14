@@ -1,11 +1,4 @@
-*.txt
-*.json
 .vs/
 .vscode/
 memes/*
 cute/*
-!*.exe
-!memes/
-!cute/
-dadList.json
-data.json

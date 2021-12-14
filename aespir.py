@@ -1,6 +1,5 @@
 #Tyler Dolph 2019-2021
 #=======================================#
-from asyncio.windows_events import NULL
 import discord
 from discord import FFmpegPCMAudio
 from discord.ext import commands
@@ -22,7 +21,12 @@ import youtube_dl
 #=======================================# from data.json
 with open('data.json') as file: data = json.load(file)
 PREFIX = data['prefix']
-TOKEN = data['token']
+tok = os.environ.get("TOKEN")
+if not tok: TOKEN = input('token not found. new token: (this is a temporary prompt. shhhhh)\n')
+else: TOKEN = tok
+STARTPETS = data['pets']
+COLOR = 0xaad5d3
+NULL = ""
 #=======================================# from dadList.json
 with open('dadList.json') as file: nodadlist = json.load(file)
 #=======================================# funky variables
@@ -102,7 +106,7 @@ async def dumpJson(filename, data):
 client.remove_command('help')
 @client.command()
 async def help(ctx):
-
+#download [d] {link or media attachment} (sends you an mp3)
     embed=discord.Embed(title="Aespir v0.6.2, spagoogi#5559 2019-2021, prefix: "+PREFIX, url="https://discord.com/oauth2/authorize?client_id=459165488572792832&scope=bot",
     description='''***--- recreational discordbottery***
 flip (a coin)
@@ -116,7 +120,6 @@ quote {user} {message} (find when they said boobie!)
 quoteall {user} (slooooooooooooooooooow)
 
 ***--- media commands***
-download [d] {link or media attachment} (sends you an mp3)
 meme (yes)
 addmeme {media attachment} (more memes!!!)
 cute (absolutely)
@@ -148,7 +151,7 @@ comebackdad (brings back dad jokes, per channel)
 invite (yes please)
 sourcecode (goodie!)
 ''',
-    color=0xaad5d3)
+    color=COLOR)
     await ctx.send(embed=embed)
     await cmdlog('help')
 #=======================================# pong!
@@ -204,6 +207,8 @@ class ydlSource(discord.PCMVolumeTransformer):
         filename = data['url'] if stream else ydl.prepare_filename(data)
         return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
 
+
+"""
 @client.command(aliases = ['d'])
 async def download(ctx, *, url = ''):
     global TotalMp3s
@@ -211,7 +216,7 @@ async def download(ctx, *, url = ''):
     filename = f'aespirdownload#{TotalMp3s}.mp3'
     TotalMp3s+=1
     ydl_options_download = {
-        'format': 'best',
+        'format': 'bestaudio/best',
         'outtmpl': filename,
         'restrictfilenames': True,
         'noplaylist': True,
@@ -225,12 +230,13 @@ async def download(ctx, *, url = ''):
         'postprocessors': [{ #outputs mp3s instead of webms
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'mp3',
-            'preferredquality': '256',}]}
+            'preferredquality': '126',}]}
     ydl_download = youtube_dl.YoutubeDL(ydl_options_download)
     async with ctx.typing(): await ydlSource.from_url(url, stream = False, ydl = ydl_download)
     await ctx.send(f'{ctx.message.author.mention}, here\'s your file!', file=discord.File(filename))
     if os.path.isfile(filename): os.remove(filename)
     await cmdlog('download')
+"""
     
 
 @client.command(aliases =['add','p','a'])
@@ -345,18 +351,21 @@ async def pet(ctx):
 #=======================================# fancy
 #uptime: {time.strftime("%H:%M:%S", psutil.boot_time())}
 @client.command(pass_context=True)
-async def stats(ping):
-    await ping.send(f'''```system stats-----
-    hostname: {socket.gethostname()}
-    latency: {round(client.latency*1000)}ms
-    CPU: {psutil.cpu_percent()}%
-    RAM: {psutil.virtual_memory().percent}%
-    public ip: 7
-bot stats--------
-    client: {client.user}
-    runtime: {time.strftime("%H:%M:%S", time.gmtime(time.time() - start))}
-    commands since startup: {totalCommands}
-    currently active in {len(client.guilds)} servers```''')
+async def stats(ctx):
+    embed=discord.Embed(title="Stats For Nerds :0", link="https://cdn.shopify.com/s/files/1/0014/1962/products/product_DR_ralsei_plush_photo3.png?v=1550098980",
+    description=f'''***--- system stats***
+hostname: {socket.gethostname()}
+latency: {round(client.latency*1000)}ms
+CPU: {psutil.cpu_percent()}%
+RAM: {psutil.virtual_memory().percent}%
+public ip: *ur moms bed*
+***--- bot stats***
+uptime: {time.strftime("%Y:%D:%H:%M:%S", time.gmtime(time.time() - start))}
+commands since last startup: {totalCommands}
+pets since last startup: {data['pets']-STARTPETS}
+currently active in {len(client.guilds)} servers''',
+    color=COLOR)
+    await ctx.send(embed=embed)
     await cmdlog('stats')
 #=======================================#
 @client.command(aliases =['8ball'])
@@ -393,7 +402,7 @@ async def echo(ctx,*,text):
 @client.command() 
 async def tylersimulator(ctx):
     s = ''.join(random.choice(string.ascii_letters) for i in range(random.randint(7,16)))
-    arr = [ 'boobie' , 'balls owo', 'whhat??', 'ghhbbb','minecraf c:', 'based', 'the yoinky sploinky', 'beepbop skeebo!', s,s,s,s ]
+    arr = [ 'boobie' , 'balls owo', 'whhat??', 'ghhbbb','minecraf c:', 'based', 'the yoinky sploinky', 'beepbop skeebo!', 'SCRUNGLE', 'God Fucking Damn It I Fucking Love The Space Shuttle', s,s,s,s,s,s,s ]
     await ctx.send(random.choice(arr))
     await cmdlog('tyler')
 #=======================================# why would you do this
@@ -447,7 +456,7 @@ async def sendImage(ctx, lists, counters, message, folder, spoiler):
         lists[id] = await shuffleImages(folder)
     imagelist = lists[id]
     counter = counters[id]
-    filename = '.\\'+folder+'\\'+imagelist[counter]
+    filename = folder+'/'+imagelist[counter]
     await ctx.send(message,file = discord.File(filename, spoiler=spoiler))
     if counter >= len(imagelist)-1: 
         counter = 0
@@ -474,13 +483,12 @@ async def addcute(ctx, link = ''):
     await cmdlog('addcute')
 #=======================================#
 async def nsfwCheck(ctx):
-    if isinstance(ctx.channel, discord.channel.DMChannel) or ctx.channel.is_nsfw(): return False
-    await ctx.send('sorry pardner, you need to be in a NSFW channel to use this command!')
-    await cmdlog('nsfwFail')
+    if not isinstance(ctx.channel, discord.channel.DMChannel) or ctx.channel.is_nsfw(): return False
+    await ctx.send('sorry pardner, you need to be in a NSFW channel or DM to use this command!')
     return True
 #=======================================# embeds images for ~meme and ~cute
 async def image(ctx, sent, folder, message):
-    await ctx.send(message,file=discord.File('.\\'+folder+'\\'+sent))
+    await ctx.send(message,file=discord.File(folder+'/'+sent))
 #=======================================# downloads an image, used for ~addmeme and ~addcute
 async def addimage(ctx, link, folder):
     global user_agent 
@@ -493,7 +501,7 @@ async def addimage(ctx, link, folder):
         request=urllib.request.Request(link, None, headers)
         response = urllib.request.urlopen(request)
         data = response.read()
-        newImg = open('.\\'+folder+'\\'+str(await imageNum('.\\'+folder))+'.'+link.split('.')[-1], "wb")
+        newImg = open(folder+'/'+str(await imageNum(folder))+'.'+link.split('.')[-1], "wb")
         newImg.write(data)
         newImg.close()
         await ctx.send('```your media has been added to the collection :)```')
@@ -655,7 +663,7 @@ async def inputLoop():
         if(len(cmd)<1): continue
         cmdlen = len(cmd)
 
-        if(cmd[0]=="/list" and cmdlen>1):
+        if(cmd[0]=="list" and cmdlen>1):
                 if(cmd[1] == "channels" and len(cmd)>2):
                     for chan in client.get_guild(int(cmd[2])).channels:
                         if str(chan.type) == 'text':
@@ -669,7 +677,7 @@ async def inputLoop():
                             if str(chan.type) == 'text':
                                 print(guild.name + "   " + chan.name + "   "+str(chan.id))
 
-        elif(cmd[0]=="/watch" and cmdlen>1):
+        elif(cmd[0]=="watch" and cmdlen>1):
             if(cmd[1]=="none"):
                 channel = NULL
                 print("no longer watching channel "+ str(id))
@@ -681,7 +689,7 @@ async def inputLoop():
                 channel = client.get_channel(id)
                 print("now watching channel "+ str(id))
 
-        elif(cmd[0]=="/control"):
+        elif(cmd[0]=="control"):
             if(cmdlen>1 and cmd[1]=="none"):
                 controlling = False
                 print("no longer controlling client in channel "+ str(id))
@@ -696,11 +704,11 @@ async def inputLoop():
                 controlling = True
                 print("now controlling client in channel "+ str(id))
 
-        elif(inp == "/exit"): sys.exit()
+        elif(inp == "stop" or inp == "exit"): sys.exit()
 
-        elif(inp == "/cls"): cls()
+        elif(inp == "clear"): cls()
 
-        elif(cmd[0]=="/gethistory" and cmdlen>1):
+        elif(cmd[0]=="gethistory" and cmdlen>1):
             historychannel = client.get_channel(int(cmd[1]))
             limit = 200
             if(cmdlen>2): limit = int(cmd[2])
@@ -717,7 +725,7 @@ async def inputLoop():
             except: print("error reading channel history, most likely lacking permissions")
 
 
-        elif(cmd[0] == "/toggle" and cmd[1]=="logs"): 
+        elif(cmd[0] == "toggle" and cmd[1]=="logs"): 
             global doCmdlog
             if(cmdlen<=2): doCmdlog = not doCmdlog
             else: doCmdlog = cmd[2].lower() in ("yes", "true", "t", "1")
@@ -751,4 +759,3 @@ except Exception: input("cannot run client, most likely a bad token\npress enter
 #┌───────┐ ┌───────┐ ┌───────┐ ┌───────┐
 #│/ FIGHT| │ ) PET | |6 ITEM | |X MERCY| 
 #└───────┘ └───────┘ └───────┘ └───────┘
-# :D
