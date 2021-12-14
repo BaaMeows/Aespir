@@ -1,5 +1,6 @@
 #Tyler Dolph 2019-2021
 #=======================================#
+from typing_extensions import runtime
 import discord
 from discord import FFmpegPCMAudio
 from discord.ext import commands
@@ -10,6 +11,7 @@ import os, os.path
 import urllib.request
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
+from discord.ext.commands.errors import CommandInvokeError
 import psutil
 import socket
 import json
@@ -357,16 +359,24 @@ async def pet(ctx):
 #uptime: {time.strftime("%H:%M:%S", psutil.boot_time())}
 @client.command(pass_context=True)
 async def stats(ctx):
+    # the core temp check only works on pis,
+    # but this check only works if you don't
+    # change your host name. I'll fix it later.
+    # Maybe. Possibly. Okay probably not
+    if socket.gethostname() == 'raspberrypi':
+        temp = round(CPUTemperature().temperature)
+    else: temp = "extra spicy"
+    
     embed=discord.Embed(title="Stats For Nerds ÓwÒ", link="https://cdn.shopify.com/s/files/1/0014/1962/products/product_DR_ralsei_plush_photo3.png?v=1550098980",
     description=f'''***--- system stats***
 hostname: {socket.gethostname()}
 network latency: {round(client.latency*1000)}ms
 CPU usage: {psutil.cpu_percent()}%
-core temperature: {round(CPUTemperature().temperature)}°C
+core temperature: {temp}°C
 RAM usage: {psutil.virtual_memory().percent}%
 public ip address: *ur moms bed*
 ***--- bot stats***
-script runtime: {time.strftime("%H hours, %M minutes, and %S seconds", time.gmtime(time.time() - start))}
+script runtime: {time.strftime('%H:%M:%S', time.gmtime(time.time() - start))}
 commands since startup: {totalCommands+1} 
 pets since startup: {data['pets']-STARTPETS}
 currently active in {len(client.guilds)} servers''',
