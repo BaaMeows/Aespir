@@ -740,17 +740,15 @@ async def inputLoop():
             except: print("error sending message, most likely lacking permissions")
 
 #=======================================# opening the token and running the client
-def run():
-    global Token
+def run(Token):
     print(f'connecting...')
     try: client.run(Token)
     except Exception: 
-        token = input("The client can't run, probably because it has a bad token.\npress enter now to exit, or enter new token: ")
-        if token != '':
-            Token = token
-            with open('token.txt', 'w') as f: json.dump(token, f)
-            run()
-run()
+        Token = input("The client can't run, probably because it has a bad token.\npress enter now to exit, or enter new token: ")
+        if Token != '':
+            with open('token.txt', 'w') as f: json.dump(Token, f)
+            run(Token)
+run(Token)
 
 
 #
