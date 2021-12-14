@@ -374,7 +374,7 @@ network latency: {round(client.latency*1000)}ms
 CPU usage: {psutil.cpu_percent()}%
 core temperature: {temp}°C
 RAM usage: {psutil.virtual_memory().percent}%
-public ip address: *ur moms bed*
+ipv4 address: *ur moms bed*
 ***--- bot stats***
 script runtime: {time.strftime('%H:%M:%S', time.gmtime(time.time() - start))}
 commands since startup: {totalCommands+1} 
