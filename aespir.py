@@ -367,7 +367,7 @@ RAM usage: {psutil.virtual_memory().percent}%
 public ip address: *ur moms bed*
 ***--- bot stats***
 script runtime: {time.strftime("%D:%H:%M:%S", time.gmtime(time.time() - start))}
-commands since startup: {totalCommands+1} #the +1 is to account for this command
+commands since startup: {totalCommands+1} 
 pets since startup: {data['pets']-STARTPETS}
 currently active in {len(client.guilds)} servers''',
     color=COLOR)
