@@ -360,15 +360,15 @@ async def stats(ctx):
     embed=discord.Embed(title="Stats For Nerds ÓwÒ", link="https://cdn.shopify.com/s/files/1/0014/1962/products/product_DR_ralsei_plush_photo3.png?v=1550098980",
     description=f'''***--- system stats***
 hostname: {socket.gethostname()}
-latency: {round(client.latency*1000)}ms
-CPU: {psutil.cpu_percent()}%
+network latency: {round(client.latency*1000)}ms
+CPU usage: {psutil.cpu_percent()}%
 core temperature: {round(CPUTemperature().temperature)}°C
-RAM: {psutil.virtual_memory().percent}%
-public ip: *ur moms bed*
+RAM usage: {psutil.virtual_memory().percent}%
+public ip address: *ur moms bed*
 ***--- bot stats***
-uptime: {time.strftime("%D:%H:%M:%S", time.gmtime(time.time() - start))}
-commands since last startup: {totalCommands+1} #the +1 is to account for this command
-pets since last startup: {data['pets']-STARTPETS}
+script runtime: {time.strftime("%D:%H:%M:%S", time.gmtime(time.time() - start))}
+commands since startup: {totalCommands+1} #the +1 is to account for this command
+pets since startup: {data['pets']-STARTPETS}
 currently active in {len(client.guilds)} servers''',
     color=COLOR)
     await ctx.send(embed=embed)
