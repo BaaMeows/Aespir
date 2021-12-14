@@ -14,16 +14,20 @@ import psutil
 import socket
 import json
 import sys
-from os import system, name
+from os import system, name, path
 import datetime
 import string
 import youtube_dl
 #=======================================# from data.json
 with open('data.json') as file: data = json.load(file)
+if path.isfile('token.json'):
+    with open('token.json') as file: token = json.load(file)
+else: 
+    token = input('token: ')
+    with open('token.json', 'w') as f: json.dump([token], f)
+
+TOKEN = token
 PREFIX = data['prefix']
-tok = os.environ.get("TOKEN")
-if not tok: TOKEN = input('token not found. new token: (this is a temporary prompt. shhhhh)\n')
-else: TOKEN = tok
 STARTPETS = data['pets']
 COLOR = 0xaad5d3
 NULL = ""
