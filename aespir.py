@@ -397,6 +397,7 @@ CPU usage: {psutil.cpu_percent()}%
 core temperature: {temp}°C
 RAM usage: {psutil.virtual_memory().percent}%
 ipv4 address: {random.choice(ips)}
+
 ***--- bot stats***
 commands since startup: {totalCommands+1} 
 pets since startup: {data['pets']-STARTPETS}
@@ -614,7 +615,8 @@ async def sourcecode(ctx):
 #=======================================# very scientific
 @client.command(pass_context=True)
 async def gay(ctx,*,input = None):
-    if input == None: input = str(ctx.message.author.mention) 
+    if input == None: input = ctx.message.author.mention
+    input = str(input)  
     input = input.replace('!','')
     random.seed(input+input)
     num = int(random.random()*101)
