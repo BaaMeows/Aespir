@@ -1,5 +1,6 @@
 #Tyler Dolph 2019-2021
 #=======================================#
+from asyncio.events import set_child_watcher
 from typing_extensions import runtime
 import discord
 from discord import FFmpegPCMAudio
@@ -38,13 +39,32 @@ NULL = ""
 with open('dadList.json') as file: nodadlist = json.load(file)
 #=======================================# funky variables
 user_agent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
-start=time.time()
+STARTTIME=int(time.time())
 client = commands.Bot(command_prefix = PREFIX)
 channel = NULL #channel that's being watched in the terminal
 loop = asyncio.get_event_loop()
 #=======================================# counters
 totalCommands = 0
 TotalMp3s = 0
+#=======================================# auihsdaiushda
+async def getRuntime(): # not the best way to do this but whatever
+    seconds = int(time.time()) - STARTTIME
+    minutes = 0
+    while seconds >= 60:
+        seconds -= 60
+        minutes += 1
+    hours = 0
+    while minutes >= 60:
+        seconds -= 60
+        hours += 1
+    days=0
+    while hours >= 24:
+        days+=1
+        hours-=24
+    return(f'{days}d{hours}h{minutes}m{seconds}s')
+
+
+
 #=======================================# yeehaw
 @client.event
 async def on_ready():
@@ -80,13 +100,13 @@ async def on_message(message):
     emoji = '❤️'
     if('aespir' in msg): 
         await message.add_reaction(emoji)
-        await cmdlog(emoji)
+        await cmdlog('<3')
 @client.command()
 @has_permissions(administrator=True)
 async def goawaydad(ctx):
     id = ctx.channel.id
     if id in nodadlist:
-        await ctx.send("he's already gone, lad")
+        await ctx.send("dad hath already hastened from thine chambers, mine lord...")
         await cmdlog('dadaway f')
         return
     nodadlist.append(id)
@@ -114,7 +134,7 @@ client.remove_command('help')
 @client.command()
 async def help(ctx):
 #download [d] {link or media attachment} (sends you an mp3)
-    embed=discord.Embed(title="Aespir v0.6.2, spagoogi#5559 2019-2021, prefix: "+PREFIX, url="https://discord.com/oauth2/authorize?client_id=459165488572792832&scope=bot",
+    embed=discord.Embed(title="Aespir v0.7.0, spagoogi#5559 2019-2021, prefix: "+PREFIX, url="https://discord.com/oauth2/authorize?client_id=459165488572792832&scope=bot",
     description='''***--- recreational discordbottery***
 flip (a coin)
 8ball {your question}
@@ -254,7 +274,7 @@ async def play(ctx, *, url = ''):
         content_type = ctx.message.attachments[0].content_type
         print(f'content type: {content_type}')
         if 'audio' not in content_type and 'video' not in content_type:
-            await ctx.send('Sorry, I can only play audio and video formats! (not images or executables. lol)')
+            await ctx.send('Sorry, I can only play audio and video formats! (not images or executables. lol???)')
             return
         url = ctx.message.attachments[0].url
 
@@ -359,6 +379,7 @@ async def pet(ctx):
 #uptime: {time.strftime("%H:%M:%S", psutil.boot_time())}
 @client.command(pass_context=True)
 async def stats(ctx):
+    ips = ['in ur mom','in ur dad','outside your window','ohio','7.16.0.216','2','under your bed','ur mums bed','ur dads bed','come outside','1.2.3.4','sex','funky town','ralsei village','miitopia']
     # the core temp check only works on pis,
     # but this check only works if you don't
     # change your host name. I'll fix it later.
@@ -373,15 +394,15 @@ async def stats(ctx):
     description=f'''***--- system stats***
 hostname: {socket.gethostname()}
 network latency: {round(client.latency*1000)}ms
-script runtime: {time.strftime('%H:%M:%S', time.gmtime(time.time() - start))}
+uptime: {await getRuntime()}
 CPU usage: {psutil.cpu_percent()}%
 core temperature: {temp}°C
 RAM usage: {psutil.virtual_memory().percent}%
-ipv4 address: *ur moms bed*
+ipv4 address: {random.choice(ips)}
 ***--- bot stats***
 commands since startup: {totalCommands+1} 
 pets since startup: {data['pets']-STARTPETS}
-currently active in {len(client.guilds)} servers''',
+***currently active in {len(client.guilds)} servers***''',
     color=COLOR)
     await ctx.send(embed=embed)
     await cmdlog('stats')
@@ -396,6 +417,14 @@ async def _8ball(ctx,*,question):
     await ctx.send(f'```Question: {question}\nAnswer: {random.choice(responses)}```')
     await cmdlog('8ball')
 #=======================================# terrifying
+async def split_by_list(txt, seps):
+    default_sep = seps[0]
+
+    # we skip seps[0] because that's the default separator
+    for sep in seps[1:]:
+        txt = txt.replace(sep, default_sep)
+    return [i.strip() for i in txt.split(default_sep)]
+
 @client.command() 
 async def uwu(ctx,*,text):
     text = text.lower()
@@ -409,6 +438,22 @@ async def uwu(ctx,*,text):
         nextLetter = text[letternum+1]
         if (letter == 'n') and nextLetter in vowels: text = text[0:letternum+1]+'y'+text[letternum+1:]
         letternum+=1
+    owos = ['OwO', 'Owo', 'owO', 'ÓwÓ', 'ÕwÕ', '@w@', 'ØwØ', 'øwø', 'uwu', '☆w☆', '✧w✧', '♥w♥', '゜w゜', '◕w◕', 'ᅌwᅌ', '◔w◔', 'ʘwʘ', '⓪w⓪', 'OvO','ovo']
+    punct = ['.',';', ',']
+    #i = 0
+    textlist = await split_by_list(text, punct)
+    text = ""
+    for phrase in textlist: 
+        phrase = phrase.strip()
+        random.seed=phrase
+        text += f'{phrase} {random.choice(owos)} '
+    '''for letter in text:
+        if letter in punct: 
+            random.seed=text+str(i*1.2)
+            letter = f' {random.choice(owos)}'
+            if i < len(text)-1 and text[i+1] == ' ': letter+=','
+            text = text[:i]+letter+text[i+1:]
+        i+=1'''
     await ctx.send(f'{text}')
     await cmdlog('uwu')
 #=======================================# 
@@ -444,9 +489,9 @@ async def flip(ctx):
     await cmdlog('flip')
 #=======================================# shuffles a list of images. gets them from the folder to add any new ones
 async def shuffleImages(folder):
-    imglist = os.listdir(f'.\\'+folder)
+    imglist = os.listdir(f'{folder}/')
     random.shuffle(imglist)
-    print('shuffled the '+folder)
+    #print('shuffled the {folder}')
     return(imglist)
 #=======================================# there are some good ones in there, i think
 memelists = {}
@@ -648,7 +693,7 @@ async def quoteall(ctx,user: discord.User,*,text = ""):
         os.remove(filename)
     await cmdlog("quote")
 #=======================================# hmmmmnnbnb
-async def on_command_error(self, ctx, error):
+async def on_command_error(self, ctx, error): # this is broken. oops!
     ignored = (commands.CommandNotFound, )
     if isinstance(error, ignored): return
     if isinstance(error, commands.DisabledCommand): await ctx.send(f'{ctx.command} is disabled!')
@@ -665,9 +710,9 @@ async def cmdlog(msg):
     if doCmdlog:
         global totalCommands
         totalCommands+=1
-        print(msg+' '*((8-len(msg))+1)+str(round(client.latency*1000))+'ms')
+        print(msg + ' '*((8-len(msg))+1) + str(round(client.latency*1000)) + 'ms')
 #=======================================# clears the screen
-def cls():
+def clear():
     if name == 'nt': _ = system('cls')
     else: _ = system('clear')
 #=======================================#
@@ -724,7 +769,7 @@ async def inputLoop():
 
         elif(inp == "stop" or inp == "exit"): sys.exit()
 
-        elif(inp == "clear"): cls()
+        elif(inp == "clear"): clear()
 
         elif(cmd[0]=="gethistory" and cmdlen>1):
             historychannel = client.get_channel(int(cmd[1]))
