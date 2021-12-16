@@ -62,9 +62,6 @@ async def getRuntime(): # not the best way to do this but whatever
         days+=1
         hours-=24
     return(f'{days}d{hours}h{minutes}m{seconds}s')
-
-
-
 #=======================================# yeehaw
 @client.event
 async def on_ready():
@@ -76,8 +73,9 @@ async def on_ready():
 @client.event 
 async def on_message(message):
     await client.process_commands(message)
+    ctx = await client.get_context(message)
+    if message.author == client.user or ctx.command: return
     id = message.channel.id
-    if message.author == client.user: return
     msg = message.content.lower()
     if(channel and id==channel.id):
         links = ""
@@ -475,7 +473,6 @@ async def pingme(ctx):
     await cmdlog('pingme1')
     await asyncio.sleep(random.randint(300,1200))
     await ctx.send(ctx.message.author.mention)
-    await cmdlog('pingme2')
 #=======================================# pop
 @client.command()
 async def pop(ctx,*,pop='pop'):
