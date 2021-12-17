@@ -29,14 +29,14 @@ if path.isfile('token.txt'):
 else: 
     token = input('token: ')
     with open('token.txt', 'w') as f: json.dump(token, f)
-
 Token = token
 PREFIX = data['prefix']
 STARTPETS = data['pets']
 COLOR = 0xaad5d3
 NULL = ""
 #=======================================# from dadList.json
-with open('dadList.json') as file: nodadlist = json.load(file)
+#with open('dadList.json') as file: nodadlist = json.load(file)
+nodadlist = data['dadlist']
 #=======================================# funky variables
 user_agent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
 STARTTIME=int(time.time())
@@ -55,13 +55,17 @@ async def getRuntime(): # not the best way to do this but whatever
         minutes += 1
     hours = 0
     while minutes >= 60:
-        seconds -= 60
+        minutes -= 60
         hours += 1
     days=0
     while hours >= 24:
-        days+=1
-        hours-=24
+        hours -= 24
+        days += 1
     return(f'{days}d{hours}h{minutes}m{seconds}s')
+#=======================================#
+async def updateData():
+    global data
+    with open("data.json", "w") as jsonFile: json.dump(data, jsonFile)
 #=======================================# yeehaw
 @client.event
 async def on_ready():
@@ -107,8 +111,8 @@ async def goawaydad(ctx):
         await ctx.send("dad hath already hastened from thine chambers, mine lord...")
         await cmdlog('dadaway f')
         return
-    nodadlist.append(id)
-    await dumpJson('dadList.json',nodadlist)
+    data['nodadlist'].append(id)
+    updateData()
     await ctx.send(f'bye {ctx.message.author.name}, i\'m dad!')
     await cmdlog('dadaway')
 #=======================================#
@@ -120,8 +124,8 @@ async def comebackdad(ctx):
         await ctx.send("dad is already enabled in this channel, silly!")
         await cmdlog('dadback f')
         return
-    nodadlist.remove(id)
-    await dumpJson('dadList.json',nodadlist)
+    data['nodadlist'].remove(id)
+    updateData()
     await ctx.send(f'hi {ctx.message.author.name}, i\'m dad!')
     await cmdlog('dadback')
 #=======================================#
@@ -370,7 +374,7 @@ async def is_connected(ctx):
 @client.command()
 async def pet(ctx):
     data['pets'] += 1
-    with open("data.json", "w") as jsonFile: json.dump(data, jsonFile)
+    updateData()
     await ctx.send(f"thanks!!!!\nI have been pet a total of {data['pets']} times")
     await cmdlog('pet')
 #=======================================# fancy
@@ -534,14 +538,9 @@ async def imageNum(directory):
     return num+1
 #=======================================# yes yes
 @client.command() 
-async def addmeme(ctx, link = ''):
-    await addimage(ctx, link, 'memes')
-    await cmdlog('addmeme')
-#=======================================# more kittens
+async def addmeme(ctx, link = ''): await addimage(ctx, link, 'memes')
 @client.command() 
-async def addcute(ctx, link = ''):
-    await addimage(ctx, link, 'cute')
-    await cmdlog('addcute')
+async def addcute(ctx, link = ''): await addimage(ctx, link, 'cute')
 #=======================================#
 async def nsfwCheck(ctx):
     if not isinstance(ctx.channel, discord.channel.DMChannel) or ctx.channel.is_nsfw(): return False
@@ -551,22 +550,23 @@ async def nsfwCheck(ctx):
 async def image(ctx, sent, folder, message):
     await ctx.send(message,file=discord.File(folder+'/'+sent))
 #=======================================# downloads an image, used for ~addmeme and ~addcute
-async def addimage(ctx, link, folder):
+async def addimage(ctx, url, dir):
     global user_agent 
     headers={'User-Agent':user_agent,}
     isLink = False
     if ctx.message.attachments:
-        link = ctx.message.attachments[0].url
+        url = ctx.message.attachments[0].url
         islink = True
     if islink:
-        request=urllib.request.Request(link, None, headers)
+        request=urllib.request.Request(url, None, headers)
         response = urllib.request.urlopen(request)
         data = response.read()
-        newImg = open(folder+'/'+str(await imageNum(folder))+'.'+link.split('.')[-1], "wb")
+        newImg = open(dir+'/'+str(await imageNum(dir))+'.'+url.split('.')[-1], "wb")
         newImg.write(data)
         newImg.close()
         await ctx.send('```your media has been added to the collection :)```')
     else: await ctx.send('```woah there buckaroo, not so fast. we only want media attachments and links in these parts, \'yahear.```')
+    await cmdlog(f'add{dir}')
 #=======================================# russian!
 chambers = {}
 @client.command(pass_context=True)
@@ -613,18 +613,40 @@ async def sourcecode(ctx):
     await ctx.send('okay, here ya go! ^-^\n'+link)
     await cmdlog('source')
 #=======================================# very scientific
+async def id(mention:str):
+    mention = mention.replace("<","")
+    mention = mention.replace(">","")
+    mention = mention.replace("@","")
+    mention = mention.replace("!","")
+    return str(mention)
+
 @client.command(pass_context=True)
 async def gay(ctx,*,input = None):
-    if input == None: input = ctx.message.author.mention
-    input = str(input)  
-    input = input.replace('!','')
-    random.seed(input+input)
-    num = int(random.random()*101)
-    if num > 95: num = 100
-    if num < 1: num = 1
-    if input == ctx.message.author.mention: await ctx.send(f'you are {num}% gay')
-    else: await ctx.send(f'{input} is {num}% gay')
+    if input == None: 
+        input = ctx.message.author.mention
+    userid = await id(input)
+    if userid in data['gay']: # idiotic :D!
+        gayness = data['gay'][userid]
+    else:
+        input = str(input)  
+        input = input.replace('!','')
+        random.seed(input+input)
+        gayness = int(random.random()*101)
+        if gayness > 95: gayness = 100
+        if gayness < 1: gayness = 1
+    if input == ctx.message.author.mention: await ctx.send(f'you are {gayness}% gay')
+    else: await ctx.send(f'{input} is {gayness}% gay')
     await cmdlog('gay')
+
+@client.command()
+async def setgay(ctx, gay:int=100):
+    dic = data['gay']
+    user = str(ctx.message.author.id)
+    if gay < 1: gay = 1
+    data['gay'][user] = gay 
+    await updateData()
+    await ctx.send(f'wow omg u r literally {gay}% gay now wow would you look at that')
+    await cmdlog('setgay')
 #=======================================# was for testing purposes. i dont have the heart to delete it
 @client.command(pass_context=True)
 async def whoami(ctx):
