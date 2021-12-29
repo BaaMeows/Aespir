@@ -374,7 +374,7 @@ async def is_connected(ctx):
 @client.command()
 async def pet(ctx):
     data['pets'] += 1
-    updateData()
+    await updateData()
     await ctx.send(f"thanks!!!!\nI have been pet a total of {data['pets']} times")
     await cmdlog('pet')
 #=======================================# fancy
