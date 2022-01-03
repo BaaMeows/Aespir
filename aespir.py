@@ -22,6 +22,9 @@ import datetime
 import string
 import youtube_dl
 from gpiozero import CPUTemperature
+import requests
+import aiohttp
+from io import BytesIO
 #=======================================# from files
 #open config file
 with open('config.json') as file: config = json.load(file)
@@ -90,6 +93,8 @@ async def on_message(message):
     if message.author == client.user or ctx.command: return
     id = message.channel.id
     msg = message.content.lower()
+    if('aespir' in msg): await message.add_reaction('❤️')
+    await cmdlog('<3')
     if(channel and id==channel.id):
         links = ""
         for attachment in message.attachments:
@@ -107,11 +112,19 @@ async def on_message(message):
                 await message.channel.send('hi ' + person +', '+im+'dad!')
                 await cmdlog("i'm dad")
                 return
+#=======================================# space!!!!
+@client.command(aliases=['astro','nasa','apod'])
+async def astronomy(ctx):
+    data = requests.get('https://api.nasa.gov/planetary/apod?api_key=ZjEOciDzMmA2h2rCYQKSZPVJ4CRGvEzvmRJaKb98').json()
+    if data['copyright']: copy = f'\ncopyright '+data['copyright'] 
+    else: copy = 'public domain'
+    text = data['explanation']+'\n'+copy+' '+data['date']
+    embed=discord.Embed(title=data['title'], description=text, url='https://apod.nasa.gov/apod/astropix.html', color=COLOR)
+    embed.set_thumbnail(url='https://science.gsfc.nasa.gov/astrophysics/images/goddardsignature2.png')
+    embed.set_image(url=data['hdurl'])
+    await ctx.send(embed=embed)
+    await cmdlog('nasa')
 #=======================================# <3
-    emoji = '❤️'
-    if('aespir' in msg): 
-        await message.add_reaction(emoji)
-        await cmdlog('<3')
 @client.command()
 @has_permissions(administrator=True)
 async def goawaydad(ctx):
