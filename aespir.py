@@ -36,7 +36,7 @@ COLOR = 0xaad5d3
 NULL = ""
 #=======================================# from dadList.json
 #with open('dadList.json') as file: nodadlist = json.load(file)
-nodadlist = data['dadlist']
+dadlist = data['dadlist']
 #=======================================# funky variables
 user_agent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
 STARTTIME=int(time.time())
@@ -87,7 +87,7 @@ async def on_message(message):
             links += " ["+attachment.url+"]"
         print("[" + message.author.name + "] " + message.content + links)
 #=======================================# dad
-    if(id not in nodadlist):
+    if(id in dadlist):
         dadmsg = msg.replace(",","")
         imList = ['i\'m ','im ','i am ']
         for im in imList:
@@ -107,27 +107,27 @@ async def on_message(message):
 @has_permissions(administrator=True)
 async def goawaydad(ctx):
     id = ctx.channel.id
-    if id in nodadlist:
+    if id not in dadlist:
         await ctx.send("dad hath already hastened from thine chambers, mine lord...")
         await cmdlog('dadaway f')
         return
-    data['nodadlist'].append(id)
+    data['dadlist'].remove(id)
     updateData()
     await ctx.send(f'bye {ctx.message.author.name}, i\'m dad!')
     await cmdlog('dadaway')
 #=======================================#
 @client.command()
 @has_permissions(administrator=True)
-async def comebackdad(ctx):
+async def dadjokes(ctx):
     id = ctx.channel.id
-    if id not in nodadlist:
+    if id in dadlist:
         await ctx.send("dad is already enabled in this channel, silly!")
         await cmdlog('dadback f')
         return
-    data['nodadlist'].remove(id)
+    data['dadlist'].append(id)
     updateData()
     await ctx.send(f'hi {ctx.message.author.name}, i\'m dad!')
-    await cmdlog('dadback')
+    await cmdlog('dadjokes')
 #=======================================#
 async def dumpJson(filename, data):
     with open(filename, 'w') as f: json.dump(data, f)
@@ -136,17 +136,19 @@ client.remove_command('help')
 @client.command()
 async def help(ctx):
 #download [d] {link or media attachment} (sends you an mp3)
-    embed=discord.Embed(title="Aespir v0.7.0, spagoogi#5559 2019-2021, prefix: "+PREFIX, url="https://discord.com/oauth2/authorize?client_id=459165488572792832&scope=bot",
+    embed=discord.Embed(title="Aespir v0.7.1, spagoogi#5559 2019-2021, prefix: "+PREFIX, url="https://discord.com/oauth2/authorize?client_id=459165488572792832&scope=bot",
     description='''***--- recreational discordbottery***
 flip (a coin)
 8ball {your question}
 echo {your message}
-uwu {your text} (uwu)
+uwu [owo] {your text} (uwu)
 pop {custom message, defaults to pop} (hehe)
 gay {message (optional)} (gay gay homosexual gay, yay!)
-pingme (pings you after a randomized timer. why would you use this?????)
+pingme (pings you after a randomized timer. why would you use this?)
 quote {user} {message} (find when they said boobie!)
 quoteall {user} (slooooooooooooooooooow)
+roulette (russian!)
+roulettespin (spins the chamber, if you're into that sort of thing)
 
 ***--- media commands***
 meme (yes)
@@ -166,15 +168,10 @@ ping (pong!)
 stats (for nerds)
 help (you're using it right now!!11!!!!1!1!)
 
-***--- NSFW channel only***
-roulette (russian!)
-roulettespin (spins the chamber, if you're into that sort of thing)
-roulettebutwithasemiautomaticpistol (not a good idea)
-owo
-
 ***--- admin only***
+dadjokes (activates dad jokes, per channel)
 goawaydad (removes dad jokes, per channel)
-comebackdad (brings back dad jokes, per channel)
+I feel like I should mention that dad jokes are disabled by default
 
 ***--- :D***
 invite (yes please)
@@ -428,7 +425,7 @@ async def split_by_list(txt, seps):
         txt = txt.replace(sep, default_sep)
     return [i.strip() for i in txt.split(default_sep)]
 
-@client.command() 
+@client.command(aliases =['owo']) 
 async def uwu(ctx,*,text):
     text = text.lower()
     replaceWithW=['l','r']
@@ -543,7 +540,7 @@ async def addmeme(ctx, link = ''): await addimage(ctx, link, 'memes')
 async def addcute(ctx, link = ''): await addimage(ctx, link, 'cute')
 #=======================================#
 async def nsfwCheck(ctx):
-    if not isinstance(ctx.channel, discord.channel.DMChannel) or ctx.channel.is_nsfw(): return False
+    if not isinstance(ctx.channel, discord.channel.DMChannel) or not ctx.channel.is_nsfw(): return False
     await ctx.send('sorry pardner, you need to be in a NSFW channel or DM to use this command!')
     return True
 #=======================================# embeds images for ~meme and ~cute
@@ -571,7 +568,6 @@ async def addimage(ctx, url, dir):
 chambers = {}
 @client.command(pass_context=True)
 async def roulette(ctx):
-    if await nsfwCheck(ctx): return
     global chambers
     id = ctx.channel.id
     if id not in chambers: chambers[id] = random.randint(0,5)
@@ -585,17 +581,10 @@ async def roulette(ctx):
 #=======================================# brr
 @client.command()
 async def roulettespin(ctx):
-    if await nsfwCheck(ctx): return
     global chambers
     chambers[ctx.channel.id] = random.randint(0,5)
     await ctx.send('```haha chamber go spin```')
     await cmdlog('spin')
-#=======================================# do not do this
-@client.command()
-async def roulettebutwithasemiautomaticpistol(ctx):
-    if await nsfwCheck(ctx): return
-    await ctx.send('```bang!```')
-    await cmdlog('rip')
 #=======================================# async terminal input
 async def inputAsync(prompt: str = ''):
     with ThreadPoolExecutor(1, 'ainput') as executor:
@@ -639,11 +628,8 @@ async def gay(ctx,*,input = None):
     await cmdlog('gay')
 
 @client.command()
-async def setgay(ctx, gay:int=100):
-    dic = data['gay']
-    user = str(ctx.message.author.id)
-    if gay < 1: gay = 1
-    data['gay'][user] = gay 
+async def setgay(ctx, gay:float=69420):
+    data['gay'][ctx.message.author.id] = gay 
     await updateData()
     await ctx.send(f'wow omg u r literally {gay}% gay now wow would you look at that')
     await cmdlog('setgay')
