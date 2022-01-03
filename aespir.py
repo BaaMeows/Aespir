@@ -22,18 +22,27 @@ import datetime
 import string
 import youtube_dl
 from gpiozero import CPUTemperature
-#=======================================# from data.json
-with open('data.json') as file: data = json.load(file)
+#=======================================# from files
+#open config file
+with open('config.json') as file: config = json.load(file)
+#open token file
 if path.isfile('token.txt'):
     with open('token.txt') as file: token = json.load(file)
 else: 
     token = input('token: ')
     with open('token.txt', 'w') as f: json.dump(token, f)
+#open data file
+if path.isfile('data.json'):
+    with open('data.json') as file: data = json.load(file)
+else: 
+    data = {'pets':0,'gay':{},'dadlist':[]}
+    with open('data.json', 'w') as f: json.dump(data, f)
+
 Token = token
-PREFIX = data['prefix']
+PREFIX = config['prefix']
 STARTPETS = data['pets']
 COLOR = 0xaad5d3
-NULL = ""
+NULL = "" #???????????????
 #=======================================# from dadList.json
 #with open('dadList.json') as file: nodadlist = json.load(file)
 dadlist = data['dadlist']
@@ -419,7 +428,6 @@ async def _8ball(ctx,*,question):
 #=======================================# terrifying
 async def split_by_list(txt, seps):
     default_sep = seps[0]
-
     # we skip seps[0] because that's the default separator
     for sep in seps[1:]:
         txt = txt.replace(sep, default_sep)
@@ -717,7 +725,7 @@ async def cmdlog(msg):
     if doCmdlog:
         global totalCommands
         totalCommands+=1
-        print(msg + ' '*((8-len(msg))+1) + str(round(client.latency*1000)) + 'ms')
+        print(msg+' '*((10-len(msg))+1)+str(round(client.latency*1000))+'ms '+await getRuntime())
 #=======================================# clears the screen
 def clear():
     if name == 'nt': _ = system('cls')
