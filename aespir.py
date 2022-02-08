@@ -120,7 +120,7 @@ async def astronomy(ctx):
     else: copy = 'public domain'
     text = data['explanation']+'\n'+copy+' '+data['date']
     embed=discord.Embed(title=data['title'], description=text, url='https://apod.nasa.gov/apod/astropix.html', color=COLOR)
-    embed.set_thumbnail(url='https://science.gsfc.nasa.gov/astrophysics/images/goddardsignature2.png')
+    #embed.set_thumbnail(url='https://science.gsfc.nasa.gov/astrophysics/images/goddardsignature2.png')
     embed.set_image(url=data['hdurl'])
     await ctx.send(embed=embed)
     await cmdlog('nasa')
@@ -413,7 +413,6 @@ async def stats(ctx):
     
     embed=discord.Embed(title="Stats For Nerds ÓwÒ", url="https://cdn.shopify.com/s/files/1/0014/1962/products/product_DR_ralsei_plush_photo3.png?v=1550098980",
     description=f'''***--- system stats***
-hostname: {socket.gethostname()}
 network latency: {round(client.latency*1000)}ms
 uptime: {await getRuntime()}
 CPU usage: {psutil.cpu_percent()}%
