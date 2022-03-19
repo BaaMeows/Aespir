@@ -116,8 +116,8 @@ async def on_message(message):
 @client.command(aliases=['astro','nasa','apod'])
 async def astronomy(ctx):
     data = requests.get('https://api.nasa.gov/planetary/apod?api_key=ZjEOciDzMmA2h2rCYQKSZPVJ4CRGvEzvmRJaKb98').json()
-    if data['copyright']: copy = f'\ncopyright '+data['copyright'] 
-    else: copy = 'public domain'
+    if 'copyright' in data: copy = f'\ncopyright '+data['copyright'] 
+    else: copy = ''
     text = data['explanation']+'\n'+copy+' '+data['date']
     embed=discord.Embed(title=data['title'], description=text, url='https://apod.nasa.gov/apod/astropix.html', color=COLOR)
     #embed.set_thumbnail(url='https://science.gsfc.nasa.gov/astrophysics/images/goddardsignature2.png')
