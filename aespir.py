@@ -52,7 +52,7 @@ dadlist = data['dadlist']
 #=======================================# funky variables
 user_agent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
 STARTTIME=int(time.time())
-client = commands.Bot(command_prefix = PREFIX)
+client = commands.Bot(command_prefix = PREFIX, intents=discord.Intents.all()) 
 channel = NULL #channel that's being watched in the terminal
 loop = asyncio.get_event_loop()
 #=======================================# counters
@@ -165,7 +165,6 @@ flip (a coin)
 echo {your message}
 uwu [owo] {your text} (uwu)
 pop {custom message, defaults to pop} (hehe)
-gay {message (optional)} (gay gay homosexual gay, yay!)
 pingme (pings you after a randomized timer. why would you use this?)
 quote {user} {message} (find when they said boobie!)
 quoteall {user} (slooooooooooooooooooow)
