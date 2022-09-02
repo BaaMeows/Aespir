@@ -93,8 +93,9 @@ async def on_message(message):
     if message.author == client.user or ctx.command: return
     id = message.channel.id
     msg = message.content.lower()
-    if('aespir' in msg): await message.add_reaction('❤️')
-    await cmdlog('<3')
+    if('aespir' in msg): 
+        await message.add_reaction('❤️')
+        await cmdlog('<3')
     if(channel and id==channel.id):
         links = ""
         for attachment in message.attachments:
@@ -170,6 +171,8 @@ quote {user} {message} (find when they said boobie!)
 quoteall {user} (slooooooooooooooooooow)
 roulette (russian!)
 roulettespin (spins the chamber, if you're into that sort of thing)
+apod [nasa] (SPACE!!!!)
+calc {word, thing} (I did the math....)
 
 ***--- media commands***
 meme (yes)
@@ -404,7 +407,7 @@ async def stats(ctx):
     # but this check only works if you don't
     # change your host name. I'll fix it later.
     # Maybe. Possibly. Okay probably not
-    if socket.gethostname() == 'raspberrypi':
+    if socket.gethostname() == 'raspberrypi': # BAD IDEA
         temp = round(CPUTemperature().temperature)
     else: 
         temps = ['extra spicy', 'steamy', 'a hotplate', 'yes', 'frosty', 'ō^Õ', 'TEMPERATURE', 'NULL', '?REDO FROM START', 'help me', 'squagga', 'hellfire','−273.15', '776']
@@ -466,13 +469,6 @@ async def uwu(ctx,*,text):
         phrase = phrase.strip()
         random.seed=phrase
         text += f'{phrase} {random.choice(owos)} '
-    '''for letter in text:
-        if letter in punct: 
-            random.seed=text+str(i*1.2)
-            letter = f' {random.choice(owos)}'
-            if i < len(text)-1 and text[i+1] == ' ': letter+=','
-            text = text[:i]+letter+text[i+1:]
-        i+=1'''
     await ctx.send(f'{text}')
     await cmdlog('uwu')
 #=======================================# 
@@ -629,29 +625,18 @@ async def id(mention:str):
     return str(mention)
 
 @client.command(pass_context=True)
-async def gay(ctx,*,input = None):
-    if input == None: 
-        input = ctx.message.author.mention
-    userid = await id(input)
-    if userid in data['gay']: # idiotic :D!
-        gayness = data['gay'][userid]
-    else:
-        input = str(input)  
-        input = input.replace('!','')
-        random.seed(input+input)
-        gayness = int(random.random()*101)
-        if gayness > 95: gayness = 100
-        if gayness < 1: gayness = 1
-    if input == ctx.message.author.mention: await ctx.send(f'you are {gayness}% gay')
-    else: await ctx.send(f'{input} is {gayness}% gay')
-    await cmdlog('gay')
-
-@client.command()
-async def setgay(ctx, gay:float=69420):
-    data['gay'][ctx.message.author.id] = gay 
-    await updateData()
-    await ctx.send(f'wow omg u r literally {gay}% gay now wow would you look at that')
-    await cmdlog('setgay')
+async def calc(ctx,word,*,thing = None):
+    if thing == None: 
+        thing = ctx.message.author.mention
+    userid = await id(thing)
+    thing = str(thing)  
+    random.seed(thing+word)
+    percentage = int(random.random()*101)
+    if percentage > 95: percentage = 100
+    if percentage < 1: percentage = 1
+    if thing == ctx.message.author.mention: await ctx.send(f'you are {percentage}% {word}')
+    else: await ctx.send(f'{thing} is {percentage}% {word}')
+    await cmdlog('percent')
 #=======================================# was for testing purposes. i dont have the heart to delete it
 @client.command(pass_context=True)
 async def whoami(ctx):
