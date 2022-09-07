@@ -81,6 +81,10 @@ async def updateData():
 #=======================================# yeehaw
 @client.event
 async def on_ready():
+    if os.name != 'nt':
+        discord.opus.load_opus('opus')
+        if not discord.opus.is_loaded():
+            raise RunTimeError('Opus failed to load')
     await client.change_presence(activity=discord.Game(name="music!"))
     #await client.change_presence(activity=discord.Activity(name="my prefix is a squiggly line"))
     print('Aespir is ready')
@@ -622,18 +626,20 @@ async def id(mention:str):
     mention = mention.replace(">","")
     mention = mention.replace("@","")
     mention = mention.replace("!","")
-    return str(mention)
+    return int(mention)
 
 @client.command(pass_context=True)
 async def calc(ctx,word,*,thing = None):
     if thing == None: 
         thing = ctx.message.author.mention
     userid = await id(thing)
-    thing = str(thing)  
+    thing = str(thing)
     random.seed(thing+word)
     percentage = int(random.random()*101)
     if percentage > 95: percentage = 100
     if percentage < 1: percentage = 1
+    user = client.get_user(await id(thing))
+    if(user): thing = user.name
     if thing == ctx.message.author.mention: await ctx.send(f'you are {percentage}% {word}')
     else: await ctx.send(f'{thing} is {percentage}% {word}')
     await cmdlog('percent')
@@ -689,7 +695,7 @@ async def quoteall(ctx,user: discord.User,*,text = ""):
         elif(text!="" and message.author == user and text.lower() in message.content.lower()): messages2.append(message)
     messages = messages2
     if(len(messages)) == 0: await ctx.send("no message was found with your specifications!")
-    elif(len(messages)<11):
+    elif(len(messages)<4):
         for message in reversed(messages):
             await ctx.send("on "+str(message.created_at.replace(microsecond=0))+", "+user.name+" said \"" + message.content + "\"")
     else:
