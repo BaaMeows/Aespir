@@ -2,6 +2,10 @@
 
 Taylor Dolph 2019-2021
 
+new, improved readme:
+HORRIBLE!!! NO-GOOD!!!!! TRAGIC!!!!! STINKY AND SMELLY!!!!
+
+old, bad, smelly readme:
 a simple bot i'm working on. it'll do simple bot things. the simple life.
 living on a small farm. fishing. that sort of thing.
 
