@@ -1,6 +1,6 @@
 # Aespir
 
-Taylor Dolph 2019-2021
+BaaMeows 2019-2021
 
 new, improved readme:
 HORRIBLE!!! NO-GOOD!!!!! TRAGIC!!!!! STINKY AND SMELLY!!!!
