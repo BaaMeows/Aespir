@@ -1,6 +1,6 @@
 # Aespir
 
-Tyler Dolph 2019-2021
+Taylor Dolph 2019-2021
 
 a simple bot i'm working on. it'll do simple bot things. the simple life.
 living on a small farm. fishing. that sort of thing.
